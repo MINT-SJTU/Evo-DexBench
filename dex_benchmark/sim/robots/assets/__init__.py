@@ -1,0 +1,1 @@
+"""Package for robot URDF/MJCF assets bundled with custom agents."""

@@ -1,0 +1,19 @@
+task_id: m04_v1
+task_name: ToasterSlider
+max_steps: 1000
+instruction: Press down the toaster lever.
+
+evaluation:
+  stages:
+    - name: reach_toaster
+      score: 0.30
+    - name: reach_slider
+      score: 0.60
+    - name: press_slider
+      score: 1.00
+
+taxonomy:
+  affordance_family: button_driven
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: kitchen

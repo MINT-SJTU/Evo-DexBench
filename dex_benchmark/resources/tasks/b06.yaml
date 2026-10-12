@@ -1,0 +1,16 @@
+task_id: b06_v1
+task_name: PenCapping
+max_steps: 3000
+instruction: Lift the pen vertically from the fixed holder, hold the uncapped pen with one hand, align the cap with the pen tip using the other hand, and fully cap the pen.
+evaluation:
+  independent_stages: true
+  stages:
+    - {name: one_assembly_object_grasped, score: 0.20}
+    - {name: both_assembly_objects_grasped, score: 0.40}
+    - {name: cap_aligned_with_pen, score: 0.70}
+    - {name: pen_capped, score: 1.00}
+taxonomy:
+  affordance_family: assembly
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

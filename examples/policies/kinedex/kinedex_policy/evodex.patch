@@ -1,0 +1,219 @@
+diff --git a/diffusion_policy/model/vision/multi_image_obs_encoder.py b/diffusion_policy/model/vision/multi_image_obs_encoder.py
+index 55e8aca..7d3ec31 100755
+--- a/diffusion_policy/model/vision/multi_image_obs_encoder.py
++++ b/diffusion_policy/model/vision/multi_image_obs_encoder.py
+@@ -8,17 +8,18 @@ from diffusion_policy.model.common.module_attr_mixin import ModuleAttrMixin
+ from diffusion_policy.common.pytorch_util import dict_apply, replace_submodules
+
+ class TactileEncoder(nn.Module):
+-    def __init__(self, output_dim=256):
++    def __init__(self, input_channels=3, num_fingers=5, output_dim=256):
+         super().__init__()
++        self.num_fingers = num_fingers
+         self.per_finger_cnn = nn.Sequential(
+-            nn.Conv1d(in_channels=3, out_channels=32, kernel_size=3, padding=1),
++            nn.Conv1d(in_channels=input_channels, out_channels=32, kernel_size=3, padding=1),
+             nn.ReLU(),
+             nn.Conv1d(32, 64, kernel_size=3, padding=1),
+             nn.ReLU(),
+             nn.AdaptiveAvgPool1d(1)  # Output: (64, 1)
+         )
+         self.fusion = nn.Sequential(
+-            nn.Linear(64 * 5, 256),
++            nn.Linear(64 * num_fingers, 256),
+             nn.ReLU(),
+             nn.Linear(256, output_dim)
+         )
+@@ -28,7 +29,7 @@ class TactileEncoder(nn.Module):
+         # B = x.shape[0]
+         # x = x.view(B, 5, 120, 3)  # (B,5,120,3)
+         features = []
+-        for i in range(5):
++        for i in range(self.num_fingers):
+             finger = x[:, i]  # (B,120,3)
+             finger = finger.permute(0, 2, 1)  # (B,3,120)
+             f = self.per_finger_cnn(finger)  # (B,64,1)
+@@ -148,7 +149,11 @@ class MultiImageObsEncoder(ModuleAttrMixin):
+         low_dim_keys = sorted(low_dim_keys)
+
+         if 'finger_raw_pressure' in low_dim_keys:
+-            self.tactile_encoder = TactileEncoder()
++            tactile_shape = key_shape_map['finger_raw_pressure']
++            self.tactile_encoder = TactileEncoder(
++                input_channels=tactile_shape[-1],
++                num_fingers=tactile_shape[0],
++            )
+
+         self.shape_meta = shape_meta
+         self.key_model_map = key_model_map
+diff --git a/diffusion_policy/model/diffusion/conditional_unet1d.py b/diffusion_policy/model/diffusion/conditional_unet1d.py
+--- a/diffusion_policy/model/diffusion/conditional_unet1d.py
++++ b/diffusion_policy/model/diffusion/conditional_unet1d.py
+@@ -186,6 +186,11 @@ class ConditionalUnet1D(ModuleAttrMixin):
+         output: (B,T,input_dim)
+         """
+         sample = einops.rearrange(sample, 'b h t -> b t h')
++        original_horizon = sample.shape[-1]
++        temporal_multiple = 2 ** len(self.up_modules)
++        temporal_padding = (-original_horizon) % temporal_multiple
++        if temporal_padding:
++            sample = torch.nn.functional.pad(sample, (0, temporal_padding))
+
+         # 1. time
+         timesteps = timestep
+@@ -209,6 +214,8 @@ class ConditionalUnet1D(ModuleAttrMixin):
+         h_local = list()
+         if local_cond is not None:
+             local_cond = einops.rearrange(local_cond, 'b h t -> b t h')
++            if temporal_padding:
++                local_cond = torch.nn.functional.pad(local_cond, (0, temporal_padding))
+             resnet, resnet2 = self.local_cond_encoder
+             x = resnet(local_cond, global_feature)
+             h_local.append(x)
+@@ -241,4 +248,6 @@ class ConditionalUnet1D(ModuleAttrMixin):
+         x = self.final_conv(x)
+
+         x = einops.rearrange(x, 'b t h -> b h t')
++        if temporal_padding:
++            x = x[:, :original_horizon]
+         return x
+diff --git a/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py b/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
+index 98fd933..3714569 100644
+--- a/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
++++ b/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
+@@ -8,6 +8,7 @@ if __name__ == "__main__":
+     os.chdir(ROOT_DIR)
+
+ import os
++import math
+ import hydra
+ import torch
+ from omegaconf import OmegaConf
+@@ -84,17 +85,40 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+             self.ema_model.set_normalizer(normalizer)
+
+         # configure lr scheduler
+-        lr_scheduler = get_scheduler(
+-            cfg.training.lr_scheduler,
+-            optimizer=self.optimizer,
+-            num_warmup_steps=cfg.training.lr_warmup_steps,
+-            num_training_steps=(
+-                len(train_dataloader) * cfg.training.num_epochs) \
+-                    // cfg.training.gradient_accumulate_every,
+-            # pytorch assumes stepping LRScheduler every epoch
+-            # however huggingface diffusers steps it every batch
+-            last_epoch=self.global_step-1
++        num_training_steps = (
++            cfg.training.max_global_steps
++            if cfg.training.max_global_steps is not None
++            else (len(train_dataloader) * cfg.training.num_epochs)
++            // cfg.training.gradient_accumulate_every
+         )
++        if cfg.training.lr_scheduler == 'cosine' and cfg.training.min_lr is not None:
++            min_lr_ratio = float(cfg.training.min_lr) / float(cfg.optimizer.lr)
++            warmup_steps = int(cfg.training.lr_warmup_steps)
++
++            def cosine_with_floor(step):
++                update = step + 1
++                if warmup_steps > 0 and update <= warmup_steps:
++                    return update / warmup_steps
++                decay_steps = max(1, num_training_steps - warmup_steps)
++                progress = min(1.0, max(0.0, (update - warmup_steps) / decay_steps))
++                cosine = 0.5 * (1.0 + math.cos(math.pi * progress))
++                return min_lr_ratio + (1.0 - min_lr_ratio) * cosine
++
++            lr_scheduler = torch.optim.lr_scheduler.LambdaLR(
++                self.optimizer,
++                lr_lambda=cosine_with_floor,
++                last_epoch=self.global_step - 1,
++            )
++        else:
++            lr_scheduler = get_scheduler(
++                cfg.training.lr_scheduler,
++                optimizer=self.optimizer,
++                num_warmup_steps=cfg.training.lr_warmup_steps,
++                num_training_steps=num_training_steps,
++                # pytorch assumes stepping LRScheduler every epoch
++                # however huggingface diffusers steps it every batch
++                last_epoch=self.global_step-1
++            )
+
+         # configure ema
+         ema: EMAModel = None
+@@ -192,7 +216,29 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                             'lr': lr_scheduler.get_last_lr()[0]
+                         }
+
+-                        is_last_batch = (batch_idx == (len(train_dataloader)-1))
++                        completed_step = self.global_step + 1
++                        checkpoint_every_steps = cfg.training.checkpoint_every_steps
++                        if checkpoint_every_steps is not None \
++                                and completed_step % checkpoint_every_steps == 0:
++                            current_step = self.global_step
++                            self.global_step = completed_step
++                            self.save_checkpoint(
++                                path=os.path.join(
++                                    self.output_dir,
++                                    'checkpoints',
++                                    f'step_{completed_step:08d}.ckpt'
++                                )
++                            )
++                            self.global_step = current_step
++
++                        reached_global_limit = (
++                            cfg.training.max_global_steps is not None
++                            and completed_step >= cfg.training.max_global_steps
++                        )
++                        is_last_batch = (
++                            batch_idx == (len(train_dataloader)-1)
++                            or reached_global_limit
++                        )
+                         if not is_last_batch:
+                             # log of last step is combined with validation and rollout
+                             wandb_run.log(step_log, step=self.global_step)
+@@ -202,6 +248,8 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                         if (cfg.training.max_train_steps is not None) \
+                             and batch_idx >= (cfg.training.max_train_steps-1):
+                             break
++                        if reached_global_limit:
++                            break
+
+                 # at the end of each epoch
+                 # replace train_loss with epoch average
+@@ -249,9 +297,24 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                         result = policy.predict_action(obs_dict)
+                         pred_action = result['action_pred']
+                         mse = torch.nn.functional.mse_loss(pred_action, gt_action)
+-                        arm_pose_mse = torch.nn.functional.mse_loss(pred_action[0:6], gt_action[0:6])
+-                        hand_mse = torch.nn.functional.mse_loss(pred_action[6:18], gt_action[6:18])
+-                        force_mse = torch.nn.functional.mse_loss(pred_action[18:], gt_action[18:])
++                        role_count = len(cfg.evodex.roles)
++                        role_action_dim = 35
++                        expected_action_dim = role_count * role_action_dim
++                        if pred_action.shape[-1] != expected_action_dim:
++                            raise ValueError(
++                                f'Expected {expected_action_dim} KineDex action dimensions, '
++                                f'got {pred_action.shape[-1]}.'
++                            )
++                        pred_by_role = pred_action.reshape(
++                            *pred_action.shape[:-1], role_count, role_action_dim)
++                        gt_by_role = gt_action.reshape(
++                            *gt_action.shape[:-1], role_count, role_action_dim)
++                        arm_pose_mse = torch.nn.functional.mse_loss(
++                            pred_by_role[..., :6], gt_by_role[..., :6])
++                        hand_mse = torch.nn.functional.mse_loss(
++                            pred_by_role[..., 6:30], gt_by_role[..., 6:30])
++                        force_mse = torch.nn.functional.mse_loss(
++                            pred_by_role[..., 30:35], gt_by_role[..., 30:35])
+                         step_log['train_action_mse_error'] = mse.item()
+                         step_log['arm_pose_mse_error'] = arm_pose_mse.item()
+                         step_log['hand_mse_error'] = hand_mse.item()
+@@ -296,5 +359,8 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                 json_logger.log(step_log)
+                 self.global_step += 1
+                 self.epoch += 1
++                if cfg.training.max_global_steps is not None \
++                        and self.global_step >= cfg.training.max_global_steps:
++                    break
+
+ @hydra.main(

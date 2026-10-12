@@ -1,0 +1,22 @@
+task_id: b02_v1
+task_name: HammerBlockAssembly
+max_steps: 5000
+instruction: Arrange the three blocks to match the reference hammer shape.
+
+evaluation:
+  independent_stages: true
+  stages:
+    - name: one_block_correct
+      score: 0.25
+    - name: two_blocks_adjacent
+      score: 0.50
+    - name: three_blocks_correct
+      score: 0.75
+    - name: hammer_stably_complete
+      score: 1.00
+
+taxonomy:
+  affordance_family: structured_configuration
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

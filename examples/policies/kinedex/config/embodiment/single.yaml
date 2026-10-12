@@ -1,0 +1,18 @@
+name: single
+config_name: single
+tactile_mode: full
+state_dim: 31
+motion_action_dim: 30
+force_dim: 5
+model_action_dim: 35
+finger_count: 5
+camera_roles: [context, interaction, wrist_right]
+observation_keys: [context_rgb, interaction_rgb, wrist_right_rgb, state, finger_raw_pressure]
+shape_meta:
+  action: {shape: [35]}
+  obs:
+    context_rgb: {shape: [3, 224, 224], type: rgb}
+    interaction_rgb: {shape: [3, 224, 224], type: rgb}
+    wrist_right_rgb: {shape: [3, 224, 224], type: rgb}
+    state: {shape: [31], type: low_dim}
+    finger_raw_pressure: {shape: [5, 29, 1], type: low_dim}

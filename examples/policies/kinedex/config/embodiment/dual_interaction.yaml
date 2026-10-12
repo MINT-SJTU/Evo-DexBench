@@ -1,0 +1,18 @@
+name: dual
+config_name: dual_interaction
+tactile_mode: full
+state_dim: 62
+motion_action_dim: 60
+force_dim: 10
+model_action_dim: 70
+finger_count: 10
+camera_roles: [interaction, wrist_left, wrist_right]
+observation_keys: [interaction_rgb, wrist_left_rgb, wrist_right_rgb, state, finger_raw_pressure]
+shape_meta:
+  action: {shape: [70]}
+  obs:
+    interaction_rgb: {shape: [3, 224, 224], type: rgb}
+    wrist_left_rgb: {shape: [3, 224, 224], type: rgb}
+    wrist_right_rgb: {shape: [3, 224, 224], type: rgb}
+    state: {shape: [62], type: low_dim}
+    finger_raw_pressure: {shape: [10, 29, 1], type: low_dim}

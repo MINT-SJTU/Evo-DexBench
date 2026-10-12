@@ -1,0 +1,41 @@
+diff --git a/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py b/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
+index 4c44a1a..f5af95d 100755
+--- a/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
++++ b/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
+@@ -298,7 +298,8 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                         pred_action = result['action_pred']
+                         mse = torch.nn.functional.mse_loss(pred_action, gt_action)
+                         role_count = len(cfg.evodex.roles)
+-                        role_action_dim = 35
++                        force_dim = int(cfg.evodex.force_dim)
++                        role_action_dim = 30 + (force_dim // role_count)
+                         expected_action_dim = role_count * role_action_dim
+                         if pred_action.shape[-1] != expected_action_dim:
+                             raise ValueError(
+@@ -313,12 +314,13 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                             pred_by_role[..., :6], gt_by_role[..., :6])
+                         hand_mse = torch.nn.functional.mse_loss(
+                             pred_by_role[..., 6:30], gt_by_role[..., 6:30])
+-                        force_mse = torch.nn.functional.mse_loss(
+-                            pred_by_role[..., 30:35], gt_by_role[..., 30:35])
+                         step_log['train_action_mse_error'] = mse.item()
+                         step_log['arm_pose_mse_error'] = arm_pose_mse.item()
+                         step_log['hand_mse_error'] = hand_mse.item()
+-                        step_log['force_mse_error'] = force_mse.item()
++                        if force_dim:
++                            force_mse = torch.nn.functional.mse_loss(
++                                pred_by_role[..., 30:], gt_by_role[..., 30:])
++                            step_log['force_mse_error'] = force_mse.item()
+                         del batch
+                         del obs_dict
+                         del gt_action
+@@ -327,7 +329,8 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                         del mse
+                         del arm_pose_mse
+                         del hand_mse
+-                        del force_mse
++                        if force_dim:
++                            del force_mse
+                 
+                 # checkpoint
+                 if (self.epoch % cfg.training.checkpoint_every) == 0:

@@ -1,0 +1,19 @@
+task_id: m10_v1
+task_name: DishwasherKnob
+instruction: Turn the dishwasher knob to the target setting.
+max_steps: 2500
+
+evaluation:
+  stages:
+    - name: dishwasher_knob_contacted
+      score: 0.30
+    - name: dishwasher_knob_near_target
+      score: 0.60
+    - name: dishwasher_knob_aligned
+      score: 1.00
+
+taxonomy:
+  affordance_family: rotational_manipulation
+  task_split: gen
+  robot_setup: single_arm_single_hand
+  scene_class: kitchen

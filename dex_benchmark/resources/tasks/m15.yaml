@@ -1,0 +1,21 @@
+task_id: m15_v1
+task_name: CandleToCabinet
+max_steps: 4000
+instruction: Open any glass cabinet door above the dresser, place the candle upright from the lower shelf into the bottom level of the glass cabinet, release it.
+
+evaluation:
+  stages:
+    - name: cabinet_door_opened
+      score: 0.25
+    - name: candle_grasped
+      score: 0.50
+    - name: candle_inside_cabinet
+      score: 0.75
+    - name: candle_stably_placed
+      score: 1.00
+
+taxonomy:
+  affordance_family: access_and_transfer
+  task_split: gen
+  robot_setup: single_arm_single_hand
+  scene_class: studio

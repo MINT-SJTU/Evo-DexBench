@@ -1,0 +1,13 @@
+name: evodex-lerobot
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - setuptools>=68
+  - wheel
+  - pip:
+      - numpy==2.2.6
+      - h5py>=3.10
+      - lerobot==0.4.4

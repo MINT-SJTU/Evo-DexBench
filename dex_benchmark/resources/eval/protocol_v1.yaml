@@ -1,0 +1,8 @@
+version: evaluation_v1
+episodes_per_condition: 20
+layouts_per_task: 3
+num_envs: 4
+sim_freq: 120
+control_freq: 30
+action_bounds_policy: clip
+observation_capture: policy

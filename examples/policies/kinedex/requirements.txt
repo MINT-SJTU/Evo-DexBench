@@ -1,0 +1,31 @@
+# PyTorch, torchvision, and LeRobot are installed separately by
+# tools/setup_kinedex.sh. LeRobot's generic package metadata requires its UI,
+# robot-control, visualization, and TorchCodec stacks; KineDex only uses the
+# dataset API and deliberately decodes video through the pinned PyAV stack.
+av==15.0.0
+accelerate==1.10.1
+datasets==4.1.1
+deepdiff==8.6.1
+diffusers==0.33.1
+dill==0.3.8
+draccus==0.10.0
+einops==0.8.1
+gymnasium==1.2.0
+huggingface-hub==0.35.3
+hydra-core==1.3.2
+imageio==2.37.0
+imageio-ffmpeg==0.6.0
+jsonlines==4.0.0
+msgpack==1.1.1
+msgpack-numpy==0.4.8
+numpy==1.26.4
+numcodecs==0.10.2
+opencv-python-headless==4.11.0.86
+packaging==25.0
+robomimic==0.2.0
+scipy==1.14.1
+termcolor==3.1.0
+tqdm==4.67.1
+wandb==0.21.4
+websockets==15.0.1
+zarr==2.12.0

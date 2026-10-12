@@ -1,0 +1,16 @@
+task_id: b15_v1
+task_name: GlassesFolding
+max_steps: 2500
+instruction: Fold one temple of the glasses fully into the storage position, and fold the other temple at least to the stable closed position.
+
+evaluation:
+  stages:
+    - {name: left_temple_folded, score: 0.40}
+    - {name: right_temple_folded, score: 0.80}
+    - {name: both_temples_folded, score: 1.00}
+
+taxonomy:
+  affordance_family: articulated_configuration_control
+  task_split: gen
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

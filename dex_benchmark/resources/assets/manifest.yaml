@@ -1,0 +1,135 @@
+schema_version: 2
+bundle_version: "2026-09-30"
+# Asset licenses describe this existing bundle, independently of the code license.
+collections:
+  - id: kenney
+    path: kenney
+    status: redistributable
+    license: CC0-1.0
+  - id: polyhaven
+    path: polyhaven
+    status: redistributable
+    license: CC0-1.0
+  - id: ycb_repository_selection
+    path: ycb
+    status: redistributable
+    license: CC-BY-4.0
+  - id: maniskill_ycb_selection
+    path: maniskill/data/assets/mani_skill2_ycb
+    status: redistributable
+    license: CC-BY-4.0
+  - id: robocasa_selection
+    path: maniskill/data/scene_datasets/robocasa_dataset
+    status: redistributable
+    license: CC-BY-4.0
+  - id: task_b01
+    path: task_assets/b01
+    status: redistributable
+    license: Apache-2.0 AND CC-BY-4.0
+  - id: task_b03
+    path: task_assets/b03
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored generated proxy geometry
+  - id: task_b04
+    path: task_assets/b04
+    status: redistributable
+    license: Apache-2.0 AND CC-BY-4.0 AND BSD-3-Clause
+  - id: task_b05_guide
+    path: task_assets/b05_packing_guide.png
+    kind: file
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored generated instruction image with C2PA provenance
+  - id: task_b05_quad
+    path: task_assets/b05_instruction_quad.obj
+    kind: file
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored geometry
+  - id: task_m06_stain
+    path: task_assets/stain.png
+    kind: file
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored texture
+  - id: task_m09
+    path: task_assets/m09
+    status: redistributable
+    license: Apache-2.0 AND CC-BY-4.0
+  - id: partnet_mobility_originals
+    path: partnet_mobility
+    status: restricted
+    license: LicenseRef-PartNet-Mobility-Research
+    source: https://huggingface.co/datasets/sapien-sim/PartNetMobility
+    required_model_files: [mobility.urdf]
+    required_models:
+      - "3392"
+      - "3558"
+      - "3574"
+      - "3614"
+      - "3678"
+      - "4200"
+      - "4216"
+      - "4500"
+      - "5601"
+      - "6963"
+      - "7167"
+      - "8736"
+      - "8867"
+      - "9992"
+      - "10143"
+      - "10449"
+      - "10489"
+      - "12050"
+      - "12065"
+      - "12445"
+      - "16378"
+      - "25144"
+      - "27189"
+      - "30666"
+      - "36912"
+      - "45642"
+      - "47443"
+      - "47648"
+      - "48381"
+      - "100021"
+      - "100038"
+      - "100078"
+      - "100129"
+      - "100150"
+      - "100189"
+      - "100664"
+      - "100828"
+      - "100906"
+      - "100908"
+      - "101377"
+      - "101408"
+      - "101860"
+      - "102100"
+      - "103041"
+      - "103301"
+      - "103323"
+      - "103477"
+      - "103927"
+      - "103981"
+  - id: partnet_mobility_modified
+    path: partnet_mobility_modified
+    status: generated
+    license: LicenseRef-PartNet-Mobility-Research
+    source: generated locally from the user's official PartNet-Mobility download
+    required_models: ["100038", "10143", "9992", "10449", "100189", "100664", "7167", "101408", "25144"]
+    required_files:
+      - 25144/mobility_collision_override.urdf
+      - 100038/pot_lid.obj
+      - 10143/mobility_collision_override.urdf
+      - 9992/mobility_collision_override.urdf
+      - 10449/mobility_collision_override.urdf
+      - 100189/mobility_collision_override.urdf
+      - 100664/mobility_collision_override.urdf
+      - 7167/mobility_collision_override.urdf
+      - 101408/mobility_collision_override.urdf
+  - id: robot_assets
+    path: package://dex_benchmark/sim/robots/assets
+    status: embedded
+    license: mixed

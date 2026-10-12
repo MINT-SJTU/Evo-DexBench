@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evodex-kinedex-example"
+version = "0.1.0"
+description = "KineDex policy plugin example for Evo-DexBench"
+license = { text = "Apache-2.0" }
+authors = [{ name = "MINT-SJTU" }]
+requires-python = ">=3.10"
+dependencies = [
+    "dex-benchmark>=0.1.0",
+    "msgpack>=1.0",
+    "msgpack-numpy>=0.4.8",
+    "numpy>=1.26,<2",
+    "websockets>=11",
+]
+
+[project.entry-points."dex_benchmark.policies"]
+kinedex = "kinedex_policy:create_kinedex_policy"
+
+[tool.setuptools.packages.find]
+include = ["kinedex_policy*"]
+
+[tool.setuptools.package-data]
+kinedex_policy = ["UPSTREAM_COMMIT", "*.patch"]

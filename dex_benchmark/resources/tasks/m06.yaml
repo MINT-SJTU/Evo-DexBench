@@ -1,0 +1,19 @@
+task_id: m06_v1
+task_name: FaucetHandle
+instruction: Grasp the rotatable faucet handle and rotate it to the open position.
+max_steps: 2000
+
+evaluation:
+  stages:
+    - name: faucet_handle_contacted
+      score: 0.30
+    - name: faucet_handle_midpoint_reached
+      score: 0.60
+    - name: faucet_opened
+      score: 1.00
+
+taxonomy:
+  affordance_family: rotational_manipulation
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: kitchen

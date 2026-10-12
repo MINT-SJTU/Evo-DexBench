@@ -1,0 +1,14 @@
+task_id: b13_v1
+task_name: ScissorsOpening
+max_steps: 2000
+instruction: Use one hand to pick up the scissors and the other hand to open them to their maximum opening angle.
+evaluation:
+  stages:
+    - {name: support_handle_stable, score: 0.40}
+    - {name: moving_handle_near_target, score: 0.70}
+    - {name: opening_angle_and_hold, score: 1.00}
+taxonomy:
+  affordance_family: articulated_configuration_control
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

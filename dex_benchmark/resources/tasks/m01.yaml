@@ -1,0 +1,19 @@
+task_id: m01_v1
+task_name: LampButton
+max_steps: 1500
+instruction: Press the lamp button to keep the lamp illuminated.
+
+evaluation:
+  stages:
+    - name: button_contacted
+      score: 0.30
+    - name: button_triggered
+      score: 0.60
+    - name: lamp_stably_lit
+      score: 1.00
+
+taxonomy:
+  affordance_family: button_driven
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: studio

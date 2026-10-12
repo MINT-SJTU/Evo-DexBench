@@ -1,0 +1,19 @@
+task_id: b01_v1
+task_name: TablewarePlacement
+max_steps: 4000
+instruction: >-
+  Arrange the tableware on the white tablecloth according to the reference image: place the plate in the center, the fork on the left, and the knife on the right. The fork and knife should be roughly aligned with the short edge of the table, with moderate skew allowed.
+
+evaluation:
+  independent_stages: true
+  stages:
+    - {name: one_tableware_placed, score: 0.30}
+    - {name: two_tableware_placed, score: 0.60}
+    - {name: all_tableware_placed, score: 0.90}
+    - {name: place_setting_stable, score: 1.00}
+
+taxonomy:
+  affordance_family: structured_configuration
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: kitchen

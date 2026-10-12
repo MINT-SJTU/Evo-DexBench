@@ -1,0 +1,16 @@
+task_id: b08_v1
+task_name: BottleFunnelInsertion
+instruction: Hold the hollow narrow-neck bottle with one hand, align the funnel with the bottle mouth using the other hand, and insert the funnel spout securely into the bottle.
+max_steps: 3000
+evaluation:
+  independent_stages: true
+  stages:
+    - {name: one_assembly_object_grasped, score: 0.20}
+    - {name: both_assembly_objects_grasped, score: 0.40}
+    - {name: funnel_aligned_with_bottle_mouth, score: 0.70}
+    - {name: funnel_inserted_in_bottle, score: 1.00}
+taxonomy:
+  affordance_family: assembly
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: kitchen

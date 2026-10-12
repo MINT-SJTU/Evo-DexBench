@@ -1,0 +1,19 @@
+task_id: m02_v1
+task_name: WallSwitch
+max_steps: 1000
+instruction: Flip the wall switch to the on position.
+
+evaluation:
+  stages:
+    - name: reach_switch
+      score: 0.30
+    - name: half_press_switch
+      score: 0.60
+    - name: turn_on_switch
+      score: 1.00
+
+taxonomy:
+  affordance_family: button_driven
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: kitchen

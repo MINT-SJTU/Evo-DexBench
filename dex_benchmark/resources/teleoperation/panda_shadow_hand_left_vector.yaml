@@ -1,0 +1,54 @@
+retargeting:
+  type: vector
+  urdf_path: shadowhand/shadowhand_left_kinematic.urdf
+  target_joint_names:
+    # WRJ1/WRJ2 stay at URDF q0; Panda EE exclusively controls wrist pose.
+    - lh_FFJ4
+    - lh_MFJ4
+    - lh_RFJ4
+    - lh_LFJ5
+    - lh_THJ5
+    - lh_FFJ3
+    - lh_MFJ3
+    - lh_RFJ3
+    - lh_LFJ4
+    - lh_THJ4
+    - lh_FFJ2
+    - lh_MFJ2
+    - lh_RFJ2
+    - lh_LFJ3
+    - lh_THJ3
+    - lh_FFJ1
+    - lh_MFJ1
+    - lh_RFJ1
+    - lh_LFJ2
+    - lh_THJ2
+    - lh_LFJ1
+    - lh_THJ1
+  target_origin_link_names:
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+    - lh_palm
+  target_task_link_names:
+    - lh_thtip
+    - lh_fftip
+    - lh_mftip
+    - lh_rftip
+    - lh_lftip
+    - lh_thmiddle
+    - lh_ffmiddle
+    - lh_mfmiddle
+    - lh_rfmiddle
+    - lh_lfmiddle
+  target_link_human_indices:
+    - [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    - [4, 8, 12, 16, 20, 2, 6, 10, 14, 18]
+  scaling_factor: 1.2
+  low_pass_alpha: 0.8

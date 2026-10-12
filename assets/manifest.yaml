@@ -1,0 +1,154 @@
+schema_version: 2
+bundle_version: "2026-09-30"
+# Asset licenses describe this existing bundle, independently of the code license.
+hash_algorithm: sha256
+tree_hash_format: sha256sum-lines-v1
+collections:
+  - id: kenney
+    path: kenney
+    status: redistributable
+    license: CC0-1.0
+    source: https://kenney.nl/assets
+    tree_sha256: 553cc581d573afbd20c0b80b9b0181a30b2df3f875019489f00b4e5dc988d545
+    used_by: [b02, studio_l1, studio_l2, studio_l3]
+  - id: polyhaven
+    path: polyhaven
+    status: redistributable
+    license: CC0-1.0
+    source: https://polyhaven.com/license
+    tree_sha256: 039684268abefe4b27a6a1349c6dced50ed62219329b76f054ad2b753f993fd7
+    used_by: [studio_l1, studio_l2, studio_l3]
+  - id: ycb_repository_selection
+    path: ycb
+    status: redistributable
+    license: CC-BY-4.0
+    source: https://ycb-benchmarks.s3.amazonaws.com/index.html
+    tree_sha256: 5834fb229b0154a7327aadc1db534e7a34111b95ffbb8ccd2595df50ea7f3b3b
+    used_by: [b01, b03, b08, m05]
+  - id: maniskill_ycb_selection
+    path: maniskill/data/assets/mani_skill2_ycb
+    status: redistributable
+    license: CC-BY-4.0
+    source: https://ycb-benchmarks.s3.amazonaws.com/index.html
+    tree_sha256: 13075b723cb78a7338f6ee7e195a14e9b138eba52de7c7e9e1d11c9c1026c8dd
+    used_by: [m09, m11, m12, m14, b04]
+  - id: robocasa_selection
+    path: maniskill/data/scene_datasets/robocasa_dataset
+    status: redistributable
+    license: CC-BY-4.0
+    source: https://github.com/robocasa/robocasa
+    tree_sha256: fa7c7afb1264859c0bb2a6592e9ed3c4ddae120e097bcb2c153e3dfd7e3a2e6a
+    used_by: [kitchen_l1, kitchen_l2, kitchen_l3]
+  - id: task_b03
+    path: task_assets/b03
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored generated proxy geometry
+    tree_sha256: f6e45b0e7c5a485c1971de5b57f54aac92565a124c8fbf4944db39ea0dc5febe
+    used_by: [b03]
+  - id: task_b05_guide
+    path: task_assets/b05_packing_guide.png
+    kind: file
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored generated instruction image with C2PA provenance
+    sha256: 5879e23eba7e085329b52259e731c2bab2d1513447c876ab929ca3a9609b4ef8
+    used_by: [b05]
+  - id: task_b05_quad
+    path: task_assets/b05_instruction_quad.obj
+    kind: file
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored geometry
+    sha256: c22723cf4630e11d17ab611cea0892e330828a7e9f470558cbb70439f49de22d
+    used_by: [b05]
+  - id: task_stain_texture
+    path: task_assets/stain.png
+    kind: file
+    status: redistributable
+    license: Apache-2.0
+    source: project-authored texture
+    sha256: 769b0f9e6392a2e599e88dd3cca7730ddaa6d3c15b2ba9161ccd2fab2461b667
+    used_by: [m06]
+  - id: partnet_mobility_originals
+    path: partnet_mobility
+    status: restricted
+    license: LicenseRef-PartNet-Mobility-Research
+    source: https://huggingface.co/datasets/sapien-sim/PartNetMobility
+    required_model_files: [mobility.urdf]
+    required_models:
+      - "3392"
+      - "3558"
+      - "3574"
+      - "3614"
+      - "3678"
+      - "4200"
+      - "4216"
+      - "4500"
+      - "5601"
+      - "6963"
+      - "7167"
+      - "8736"
+      - "8867"
+      - "9992"
+      - "10143"
+      - "10449"
+      - "10489"
+      - "12050"
+      - "12065"
+      - "12445"
+      - "16378"
+      - "25144"
+      - "27189"
+      - "30666"
+      - "36912"
+      - "45642"
+      - "47443"
+      - "47648"
+      - "48381"
+      - "100021"
+      - "100038"
+      - "100078"
+      - "100129"
+      - "100150"
+      - "100189"
+      - "100664"
+      - "100828"
+      - "100906"
+      - "100908"
+      - "101377"
+      - "101408"
+      - "101860"
+      - "102100"
+      - "103041"
+      - "103301"
+      - "103323"
+      - "103477"
+      - "103927"
+      - "103981"
+    missing_models: []
+    distribution: excluded
+  - id: partnet_collision_overlays_generated
+    path: partnet_mobility_modified
+    status: generated
+    license: LicenseRef-PartNet-Mobility-Research
+    source: generated locally from the user's official PartNet-Mobility download
+    required_models: ["100038", "10143", "9992", "10449", "100189", "100664", "7167", "101408", "25144"]
+    required_files:
+      - 25144/mobility_collision_override.urdf
+      - 100038/pot_lid.obj
+      - 10143/mobility_collision_override.urdf
+      - 9992/mobility_collision_override.urdf
+      - 10449/mobility_collision_override.urdf
+      - 100189/mobility_collision_override.urdf
+      - 100664/mobility_collision_override.urdf
+      - 7167/mobility_collision_override.urdf
+      - 101408/mobility_collision_override.urdf
+    distribution: excluded; generator is shipped in the code repository
+  - id: robot_assets
+    path: package://dex_benchmark/sim/robots/assets
+    status: embedded
+    license: mixed
+    source: vendored robot description packages
+    tree_sha256: 98db3fdf6556927f6fbe5c096624b7e4c7cdcbbeb0e9611c2e0f5e6cc790e6d5
+    used_by: [all_tasks]

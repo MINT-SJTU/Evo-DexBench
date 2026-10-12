@@ -1,0 +1,22 @@
+task_id: b09_v1
+task_name: PlugInsertion
+instruction: Hold the socket and the two-pin plug with opposite hands, align both pins with the socket, and fully insert the plug.
+max_steps: 3000
+
+evaluation:
+  independent_stages: true
+  stages:
+    - name: plug_and_socket_held
+      score: 0.25
+    - name: plug_aligned_with_socket
+      score: 0.50
+    - name: both_pins_entered_socket
+      score: 0.75
+    - name: plug_fully_inserted
+      score: 1.00
+
+taxonomy:
+  affordance_family: assembly
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

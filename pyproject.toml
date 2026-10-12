@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dex-benchmark"
+version = "0.1.0"
+description = "Evo-DexBench: a dexterous manipulation benchmark built on ManiSkill 3."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "MINT-SJTU" }]
+dependencies = [
+    "numpy>=1.26,<2",
+    "torch==2.5.1",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+dexbench = "dex_benchmark.cli:main"
+
+[project.optional-dependencies]
+maniskill = [
+    "mani_skill>=3.0.1,<3.1",
+    # Gymnasium 1.4 adds a semaphore argument to AsyncVectorEnv workers.
+    # CPUParallelEnv currently targets the compatible 1.2-1.3 worker contract.
+    "gymnasium>=1.2,<1.4",
+    "sapien>=3.0",
+    "opencv-python==4.11.0.86",
+    "transforms3d>=0.4",
+    "trimesh>=4.0",
+    "pillow>=12.0",
+]
+assets = [
+    "huggingface-hub>=0.35,<2",
+    "requests>=2.33",
+]
+data = [
+    "h5py>=3.10",
+]
+vr = [
+    "vuer>=0.1.6,<0.2",
+    "msgpack>=1.0",
+    "dex_retargeting>=0.4,<0.5",
+]
+policy-client = [
+    # Lightweight dependencies shared by out-of-process policy clients.
+    "msgpack>=1.0",
+    "msgpack-numpy>=0.4.8",
+    "websockets>=11",
+]
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+include = ["dex_benchmark*"]
+
+[tool.setuptools.package-data]
+"dex_benchmark.sim.robots.assets" = ["**/*"]
+"dex_benchmark.resources" = ["**/*.yaml", "**/*.json"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["**/__pycache__/*", "**/*.pyc"]

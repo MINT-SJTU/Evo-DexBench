@@ -1,0 +1,16 @@
+task_id: b07_v1
+task_name: CupSleeveFit
+instruction: Hold the tapered cup with one hand, move the sleeve upward from the bottom with the other hand, and fit it around the middle of the cup.
+max_steps: 3000
+evaluation:
+  independent_stages: true
+  stages:
+    - {name: one_assembly_object_grasped, score: 0.20}
+    - {name: both_assembly_objects_grasped, score: 0.40}
+    - {name: sleeve_aligned_below_cup, score: 0.70}
+    - {name: sleeve_fitted_on_cup, score: 1.00}
+taxonomy:
+  affordance_family: assembly
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: kitchen

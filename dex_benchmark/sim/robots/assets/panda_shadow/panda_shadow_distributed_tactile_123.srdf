@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="panda_shadow_distributed_tactile_123">
+  <disable_collisions link1="rh_forearm" link2="rh_palm" reason="Default" />
+  <disable_collisions link1="rh_palm" link2="rh_ffproximal" reason="Default" />
+  <disable_collisions link1="rh_palm" link2="rh_mfproximal" reason="Default" />
+  <disable_collisions link1="rh_palm" link2="rh_rfproximal" reason="Default" />
+  <disable_collisions link1="rh_palm" link2="rh_lfproximal" reason="Default" />
+  <disable_collisions link1="rh_palm" link2="rh_thproximal" reason="Default" />
+  <disable_collisions link1="rh_thproximal" link2="rh_thmiddle" reason="Default" />
+  <disable_collisions link1="rh_ffknuckle" link2="rh_mfknuckle" reason="Default" />
+  <disable_collisions link1="rh_mfknuckle" link2="rh_rfknuckle" reason="Default" />
+  <disable_collisions link1="rh_rfknuckle" link2="rh_lfknuckle" reason="Default" />
+  <!-- 123 taxels are logical sampling regions; the URDF contains no tactile links, joints, or collision shapes. -->
+</robot>

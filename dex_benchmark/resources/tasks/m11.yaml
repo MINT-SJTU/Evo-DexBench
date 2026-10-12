@@ -1,0 +1,21 @@
+task_id: m11_v1
+task_name: CupFromCabinet
+instruction: Use the right hand to open the cabinet door, grasp the small cup by its handle, remove it, and place it fully on the countertop near the bottom of the cabinet.
+max_steps: 3000
+
+evaluation:
+  stages:
+    - name: open_cabinet_door
+      score: 0.25
+    - name: grasp_jar
+      score: 0.50
+    - name: take_jar_out
+      score: 0.75
+    - name: place_jar_on_counter
+      score: 1.00
+
+taxonomy:
+  affordance_family: access_and_transfer
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: kitchen

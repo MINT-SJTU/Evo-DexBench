@@ -1,0 +1,16 @@
+task_id: b14_v1
+task_name: BoxLidOpening
+max_steps: 1500
+instruction: Use one hand to stabilize the box and the other hand to grasp the front edge or handle of the lid, then fully open the lid.
+
+evaluation:
+  stages:
+    - {name: box_stabilized, score: 0.30}
+    - {name: lid_opening_started, score: 0.60}
+    - {name: lid_target_angle_stable, score: 1.00}
+
+taxonomy:
+  affordance_family: articulated_configuration_control
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

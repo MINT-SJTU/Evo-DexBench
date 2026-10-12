@@ -1,0 +1,17 @@
+task_id: b12_v1
+task_name: StaplerPaperMark
+max_steps: 2000
+instruction: Insert the sheet of paper between the stapler's upper and lower structures, press down to create a staple mark, and then move the stapler away.
+
+evaluation:
+  stages:
+    - {name: paper_grasped, score: 0.20}
+    - {name: paper_under_stapler, score: 0.50}
+    - {name: stapler_pressed, score: 0.70}
+    - {name: stapler_moved_after_mark, score: 1.00}
+
+taxonomy:
+  affordance_family: articulated_configuration_control
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

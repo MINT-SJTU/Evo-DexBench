@@ -1,0 +1,268 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="shadowhand_left_kinematic">
+  <link name="lh_forearm" />
+  <link name="lh_wrist" />
+  <link name="lh_palm" />
+  <link name="lh_manipulator" />
+  <link name="lh_imu" />
+  <link name="lh_ffknuckle" />
+  <link name="lh_ffproximal" />
+  <link name="lh_ffmiddle" />
+  <link name="lh_ffdistal" />
+  <link name="lh_fftip" />
+  <link name="ff_tip_touch_link" />
+  <link name="lh_mfknuckle" />
+  <link name="lh_mfproximal" />
+  <link name="lh_mfmiddle" />
+  <link name="lh_mfdistal" />
+  <link name="lh_mftip" />
+  <link name="mf_tip_touch_link" />
+  <link name="lh_rfknuckle" />
+  <link name="lh_rfproximal" />
+  <link name="lh_rfmiddle" />
+  <link name="lh_rfdistal" />
+  <link name="lh_rftip" />
+  <link name="rf_tip_touch_link" />
+  <link name="lh_lfmetacarpal" />
+  <link name="lh_lfknuckle" />
+  <link name="lh_lfproximal" />
+  <link name="lh_lfmiddle" />
+  <link name="lh_lfdistal" />
+  <link name="lh_lftip" />
+  <link name="lf_tip_touch_link" />
+  <link name="lh_thbase" />
+  <link name="lh_thproximal" />
+  <link name="lh_thhub" />
+  <link name="lh_thmiddle" />
+  <link name="lh_thdistal" />
+  <link name="lh_thtip" />
+  <link name="th_tip_touch_link" />
+  <joint name="lh_WRJ2" type="revolute">
+    <parent link="lh_forearm" />
+    <child link="lh_wrist" />
+    <origin rpy="0 -0 -0" xyz="-0 -0.01 0.21301" />
+    <axis xyz="0 -1 -0" />
+    <limit effort="10" lower="-0.5235987755982988" upper="0.17453292519943295" velocity="2.0" />
+  </joint>
+  <joint name="lh_ee_fixed_joint" type="fixed">
+    <parent link="lh_palm" />
+    <child link="lh_manipulator" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.05" />
+  </joint>
+  <joint name="lh_WRJ1" type="revolute">
+    <parent link="lh_wrist" />
+    <child link="lh_palm" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.034" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="30" lower="-0.6981317007977318" upper="0.4886921905584123" velocity="2.0" />
+  </joint>
+  <joint name="lh_palm_to_imu" type="fixed">
+    <parent link="lh_palm" />
+    <child link="lh_imu" />
+    <origin rpy="-1.5707963 -3.141592 -0" xyz="-0.01785 0.00765 0.049125" />
+  </joint>
+  <joint name="lh_FFJ4" type="revolute">
+    <parent link="lh_palm" />
+    <child link="lh_ffknuckle" />
+    <origin rpy="0 -0 -0" xyz="-0.033 0 0.095" />
+    <axis xyz="0 1 -0" />
+    <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0" />
+  </joint>
+  <joint name="lh_FFJ3" type="revolute">
+    <parent link="lh_ffknuckle" />
+    <child link="lh_ffproximal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="-0.2617993877991494" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_FFJ2" type="revolute">
+    <parent link="lh_ffproximal" />
+    <child link="lh_ffmiddle" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.045" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_FFJ1" type="revolute">
+    <parent link="lh_ffmiddle" />
+    <child link="lh_ffdistal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.025" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_FFtip" type="fixed">
+    <parent link="lh_ffdistal" />
+    <child link="lh_fftip" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.026" />
+  </joint>
+  <joint name="ff_tip_touch_joint" type="fixed">
+    <parent link="lh_fftip" />
+    <child link="ff_tip_touch_link" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+  </joint>
+  <joint name="lh_MFJ4" type="revolute">
+    <parent link="lh_palm" />
+    <child link="lh_mfknuckle" />
+    <origin rpy="0 -0 -0" xyz="-0.011 0 0.099" />
+    <axis xyz="0 1 -0" />
+    <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0" />
+  </joint>
+  <joint name="lh_MFJ3" type="revolute">
+    <parent link="lh_mfknuckle" />
+    <child link="lh_mfproximal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="-0.2617993877991494" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_MFJ2" type="revolute">
+    <parent link="lh_mfproximal" />
+    <child link="lh_mfmiddle" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.045" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_MFJ1" type="revolute">
+    <parent link="lh_mfmiddle" />
+    <child link="lh_mfdistal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.025" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_MFtip" type="fixed">
+    <parent link="lh_mfdistal" />
+    <child link="lh_mftip" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.026" />
+  </joint>
+  <joint name="mf_tip_touch_joint" type="fixed">
+    <parent link="lh_mftip" />
+    <child link="mf_tip_touch_link" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+  </joint>
+  <joint name="lh_RFJ4" type="revolute">
+    <parent link="lh_palm" />
+    <child link="lh_rfknuckle" />
+    <origin rpy="0 -0 -0" xyz="0.011 0 0.095" />
+    <axis xyz="0 -1 -0" />
+    <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0" />
+  </joint>
+  <joint name="lh_RFJ3" type="revolute">
+    <parent link="lh_rfknuckle" />
+    <child link="lh_rfproximal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="-0.2617993877991494" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_RFJ2" type="revolute">
+    <parent link="lh_rfproximal" />
+    <child link="lh_rfmiddle" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.045" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_RFJ1" type="revolute">
+    <parent link="lh_rfmiddle" />
+    <child link="lh_rfdistal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.025" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_RFtip" type="fixed">
+    <parent link="lh_rfdistal" />
+    <child link="lh_rftip" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.026" />
+  </joint>
+  <joint name="rf_tip_touch_joint" type="fixed">
+    <parent link="lh_rftip" />
+    <child link="rf_tip_touch_link" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+  </joint>
+  <joint name="lh_LFJ5" type="revolute">
+    <parent link="lh_palm" />
+    <child link="lh_lfmetacarpal" />
+    <origin rpy="0 0.9599 -0" xyz="0.033 0 0.02071" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="0.7853981633974483" velocity="2.0" />
+  </joint>
+  <joint name="lh_LFJ4" type="revolute">
+    <parent link="lh_lfmetacarpal" />
+    <child link="lh_lfknuckle" />
+    <origin rpy="0 -0.9599 -0" xyz="-0.05397275 0 0.03779463" />
+    <axis xyz="0 -1 -0" />
+    <limit effort="2" lower="-0.3490658503988659" upper="0.3490658503988659" velocity="2.0" />
+  </joint>
+  <joint name="lh_LFJ3" type="revolute">
+    <parent link="lh_lfknuckle" />
+    <child link="lh_lfproximal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="-0.2617993877991494" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_LFJ2" type="revolute">
+    <parent link="lh_lfproximal" />
+    <child link="lh_lfmiddle" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.045" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_LFJ1" type="revolute">
+    <parent link="lh_lfmiddle" />
+    <child link="lh_lfdistal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.025" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2" lower="0" upper="1.5707963267948966" velocity="2.0" />
+  </joint>
+  <joint name="lh_LFtip" type="fixed">
+    <parent link="lh_lfdistal" />
+    <child link="lh_lftip" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.026" />
+  </joint>
+  <joint name="lf_tip_touch_joint" type="fixed">
+    <parent link="lh_lftip" />
+    <child link="lf_tip_touch_link" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+  </joint>
+  <joint name="lh_THJ5" type="revolute">
+    <parent link="lh_palm" />
+    <child link="lh_thbase" />
+    <origin rpy="-0.785398163397448 -0 1.5707963267949" xyz="-0.034 -0.00858 0.029" />
+    <axis xyz="0 -0 1" />
+    <limit effort="5.0" lower="-1.0471975511965976" upper="1.0471975511965976" velocity="4.0" />
+  </joint>
+  <joint name="lh_THJ4" type="revolute">
+    <parent link="lh_thbase" />
+    <child link="lh_thproximal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+    <axis xyz="0 -1 -0" />
+    <limit effort="3" lower="0.0" upper="1.2217304763960306" velocity="4.0" />
+  </joint>
+  <joint name="lh_THJ3" type="revolute">
+    <parent link="lh_thproximal" />
+    <child link="lh_thhub" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.038" />
+    <axis xyz="0 -1 -0" />
+    <limit effort="2.0" lower="-0.20943951023931953" upper="0.20943951023931953" velocity="4.0" />
+  </joint>
+  <joint name="lh_THJ2" type="revolute">
+    <parent link="lh_thhub" />
+    <child link="lh_thmiddle" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="2.0" lower="-0.6981317007977318" upper="0.6981317007977318" velocity="2.0" />
+  </joint>
+  <joint name="lh_THJ1" type="revolute">
+    <parent link="lh_thmiddle" />
+    <child link="lh_thdistal" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.032" />
+    <axis xyz="1 -0 -0" />
+    <limit effort="1.0" lower="-0.2617993877991494" upper="1.5707963267948966" velocity="4.0" />
+  </joint>
+  <joint name="lh_thtip" type="fixed">
+    <parent link="lh_thdistal" />
+    <child link="lh_thtip" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0.0275" />
+  </joint>
+  <joint name="th_tip_touch_joint" type="fixed">
+    <parent link="lh_thtip" />
+    <child link="th_tip_touch_link" />
+    <origin rpy="0 -0 -0" xyz="-0 0 0" />
+  </joint>
+</robot>

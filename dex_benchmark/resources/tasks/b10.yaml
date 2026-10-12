@@ -1,0 +1,20 @@
+task_id: b10_v1
+task_name: ScissorsSheathing
+instruction: Fully insert the tip of the closed scissors into the plastic scissors sheath.
+max_steps: 3000
+
+evaluation:
+  independent_stages: true
+  stages:
+    - name: scissors_grasped
+      score: 0.20
+    - name: scissors_tip_aligned_with_sheath
+      score: 0.60
+    - name: scissors_fully_sheathed
+      score: 1.00
+
+taxonomy:
+  affordance_family: assembly
+  task_split: gen
+  robot_setup: dual_arm_dual_hand
+  scene_class: kitchen

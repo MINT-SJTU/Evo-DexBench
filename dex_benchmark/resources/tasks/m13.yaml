@@ -1,0 +1,21 @@
+task_id: m13_v1
+task_name: TennisBallTransfer
+max_steps: 3000
+instruction: Open the sliding cabinet door, move the tennis ball from the first shelf to the second shelf and place it securely, then close the cabinet door.
+
+evaluation:
+  stages:
+    - name: cabinet_accessible
+      score: 0.20
+    - name: tennis_ball_grasped
+      score: 0.45
+    - name: tennis_ball_stably_placed
+      score: 0.75
+    - name: cabinet_closed
+      score: 1.00
+
+taxonomy:
+  affordance_family: access_and_transfer
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: studio

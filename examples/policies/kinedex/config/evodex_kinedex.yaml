@@ -1,0 +1,172 @@
+defaults:
+  - embodiment: single
+  - _self_
+
+name: evodex_kinedex_${embodiment.config_name}
+_target_: diffusion_policy.workspace.train_diffusion_unet_image_workspace.TrainDiffusionUnetImageWorkspace
+task_name: evodex_${embodiment.config_name}
+shape_meta: ${embodiment.shape_meta}
+exp_name: default
+
+horizon: 16
+n_obs_steps: 2
+n_action_steps: 15
+n_latency_steps: 0
+dataset_obs_steps: ${n_obs_steps}
+past_action_visible: false
+keypoint_visible_rate: 1.0
+obs_as_global_cond: true
+
+policy:
+  _target_: diffusion_policy.policy.diffusion_unet_image_policy.DiffusionUnetImagePolicy
+  shape_meta: ${shape_meta}
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddim.DDIMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    clip_sample: true
+    set_alpha_to_one: true
+    steps_offset: 0
+    prediction_type: epsilon
+  obs_encoder:
+    _target_: diffusion_policy.model.vision.multi_image_obs_encoder.MultiImageObsEncoder
+    shape_meta: ${shape_meta}
+    rgb_model:
+      _target_: diffusion_policy.model.vision.model_getter.get_resnet
+      name: resnet18
+      weights: null
+    resize_shape: [224, 224]
+    crop_shape: [202, 202]
+    random_crop: true
+    use_group_norm: true
+    share_rgb_model: false
+    imagenet_norm: true
+  horizon: ${horizon}
+  n_action_steps: ${n_action_steps}
+  n_obs_steps: ${n_obs_steps}
+  num_inference_steps: 16
+  obs_as_global_cond: ${obs_as_global_cond}
+  diffusion_step_embed_dim: 128
+  down_dims: [512, 1024, 2048]
+  kernel_size: 5
+  n_groups: 8
+  cond_predict_scale: true
+
+ema:
+  _target_: diffusion_policy.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+
+task:
+  dataset:
+    _target_: kinedex_policy.dataset.make_lerobot_v3_kinedex_dataset
+    dataset_path: null
+    repo_id: null
+    dataset_paths: null
+    repo_ids: null
+    dataset_weights: null
+    replay_dataset_paths: null
+    replay_repo_ids: null
+    replay_ratio: 0.0
+    embodiment: ${embodiment.name}
+    camera_roles: ${embodiment.camera_roles}
+    tactile_mode: ${embodiment.tactile_mode}
+    horizon: ${horizon}
+    n_obs_steps: ${n_obs_steps}
+    val_ratio: 0.1
+    seed: ${training.seed}
+    split: train
+    video_backend: pyav
+    video_reader_cache_size: ${cpu_data_pipeline.video_reader_cache_size}
+    decode_max_gap_frames: ${cpu_data_pipeline.decode_max_gap_frames}
+    decode_max_span_frames: ${cpu_data_pipeline.decode_max_span_frames}
+  env_runner:
+    _target_: kinedex_policy.offline_runner.OfflineImageRunner
+
+dataloader:
+  batch_size: 32
+  num_workers: 8
+  shuffle: true
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: ${cpu_data_pipeline.prefetch_factor}
+val_dataloader:
+  batch_size: 32
+  num_workers: 4
+  shuffle: false
+  pin_memory: true
+  persistent_workers: false
+  prefetch_factor: ${cpu_data_pipeline.prefetch_factor}
+
+cpu_data_pipeline:
+  sampling_mode: locality
+  temporal_block_size: 128
+  prefetch_factor: 2
+  video_reader_cache_size: 8
+  decode_max_gap_frames: 30
+  decode_max_span_frames: 128
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 1.0e-4
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
+
+training:
+  device: cuda:0
+  seed: 42
+  debug: false
+  resume: true
+  resume_checkpoint: null
+  init_checkpoint: null
+  lr_scheduler: cosine
+  lr_warmup_steps: 500
+  min_lr: null
+  max_global_steps: null
+  checkpoint_every_steps: null
+  periodic_checkpoint_exclude_keys: []
+  num_epochs: 300
+  gradient_accumulate_every: 1
+  use_ema: true
+  freeze_encoder: false
+  rollout_every: 1000000
+  checkpoint_every: 10
+  val_every: 1
+  sample_every: 5
+  max_train_steps: null
+  max_val_steps: null
+  tqdm_interval_sec: 1.0
+
+logging:
+  project: Evo-DexBench
+  resume: true
+  mode: online
+  name: ${now:%Y.%m.%d-%H.%M.%S}_${name}
+  tags: null
+  id: null
+  group: null
+
+checkpoint:
+  save_final: true
+  topk:
+    monitor_key: val_loss
+    mode: min
+    k: 3
+    format_str: epoch={epoch:04d}-val_loss={val_loss:.4f}.ckpt
+  save_last_ckpt: true
+  save_last_snapshot: false
+
+evodex: {}
+
+hydra:
+  run:
+    dir: outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}
+  sweep:
+    dir: outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}
+    subdir: ${hydra.job.num}

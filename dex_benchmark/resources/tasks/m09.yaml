@@ -1,0 +1,21 @@
+task_id: m09_v1
+task_name: KettleLidTab
+instruction: Grasp the radial tab on top of the fixed kettle lid and rotate it until the end of the tab is aligned with the target notch on the kettle opening.
+max_steps: 2500
+
+evaluation:
+  stages:
+    - name: cap_grasped
+      score: 0.30
+    - name: cap_positive_rotation
+      score: 0.55
+    - name: cap_target_neighborhood
+      score: 0.80
+    - name: cap_aligned_and_stable
+      score: 1.00
+
+taxonomy:
+  affordance_family: rotational_manipulation
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: kitchen

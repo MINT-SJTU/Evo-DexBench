@@ -1,0 +1,24 @@
+task_id: m14_v1
+task_name: BananaFromDrawer
+max_steps: 4000
+instruction: Open the top drawer, take the banana out and place it securely on the desk, then close the drawer.
+
+evaluation:
+  stages:
+    - name: drawer_accessible
+      score: 0.25
+      persistence: until_next
+    - name: banana_grasped
+      score: 0.40
+    - name: banana_outside_drawer
+      score: 0.60
+    - name: banana_stably_placed
+      score: 0.85
+    - name: drawer_closed
+      score: 1.00
+
+taxonomy:
+  affordance_family: access_and_transfer
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: studio

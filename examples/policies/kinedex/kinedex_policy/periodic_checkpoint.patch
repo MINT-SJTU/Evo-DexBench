@@ -1,0 +1,16 @@
+diff --git a/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py b/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
+--- a/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
++++ b/diffusion_policy/workspace/train_diffusion_unet_image_workspace.py
+@@ -225,8 +225,11 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
+                             self.save_checkpoint(
+                                 path=os.path.join(
+                                     self.output_dir,
+                                     'checkpoints',
+                                     f'step_{completed_step:08d}.ckpt'
+-                                )
++                                ),
++                                exclude_keys=tuple(
++                                    cfg.training.periodic_checkpoint_exclude_keys
++                                )
+                             )
+                             self.global_step = current_step

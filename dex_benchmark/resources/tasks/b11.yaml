@@ -1,0 +1,16 @@
+task_id: b11_v1
+task_name: LaptopClosing
+max_steps: 1500
+instruction: Use one hand to stabilize the laptop base and the other hand to touch the screen, then close the screen to approximately 25 degrees.
+
+evaluation:
+  stages:
+    - {name: lid_edge_contacted, score: 0.30}
+    - {name: lid_mid_angle_reached, score: 0.60}
+    - {name: lid_target_angle_stable, score: 1.00}
+
+taxonomy:
+  affordance_family: articulated_configuration_control
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio

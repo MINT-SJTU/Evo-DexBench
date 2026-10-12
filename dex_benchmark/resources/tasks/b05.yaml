@@ -1,0 +1,22 @@
+task_id: b05_v1
+task_name: BoxPacking
+instruction: Use both hands to place the three differently shaped objects into the box, then close the lid.
+max_steps: 4000
+
+evaluation:
+  independent_stages: true
+  stages:
+    - name: first_object_packed
+      score: 0.20
+    - name: second_object_packed
+      score: 0.40
+    - name: all_objects_packed
+      score: 0.75
+    - name: box_lid_fully_closed
+      score: 1.00
+
+taxonomy:
+  affordance_family: structured_configuration
+  task_split: gen
+  robot_setup: dual_arm_dual_hand
+  scene_class: kitchen

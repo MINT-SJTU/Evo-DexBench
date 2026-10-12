@@ -1,0 +1,19 @@
+task_id: m03_v1
+task_name: PhoneHomeButton
+max_steps: 2000
+instruction: Press and release the red Home button on the phone lying on the table, so that the screen is displayed.
+
+evaluation:
+  stages:
+    - name: home_button_contacted
+      score: 0.30
+    - name: home_button_pressed
+      score: 0.70
+    - name: home_button_released
+      score: 1.00
+
+taxonomy:
+  affordance_family: button_driven
+  task_split: core
+  robot_setup: single_arm_single_hand
+  scene_class: studio

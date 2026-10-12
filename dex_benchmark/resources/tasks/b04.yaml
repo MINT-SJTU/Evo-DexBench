@@ -1,0 +1,17 @@
+task_id: b04_v1
+task_name: RingTowerAssembly
+max_steps: 4000
+instruction: Following the tabletop diagram, place the three colored disks onto the post from largest to smallest.
+
+evaluation:
+  independent_stages: true
+  stages:
+    - {name: bottom_ring_on_post, score: 0.30}
+    - {name: middle_ring_on_post, score: 0.60}
+    - {name: tower_complete_and_stable, score: 1.00}
+
+taxonomy:
+  affordance_family: structured_configuration
+  task_split: core
+  robot_setup: dual_arm_dual_hand
+  scene_class: studio
