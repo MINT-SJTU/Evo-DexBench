@@ -1,6 +1,6 @@
 # Evo-DexBench
 
-![Paper](https://img.shields.io/badge/📄_Paper-coming_soon-lightgrey)
+[![Paper](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/abs/2610.21180)
 [![Project Page](https://img.shields.io/badge/🌐_Project_Page-coming_soon-lightgrey)](https://mint-sjtu.github.io/Evo-DexBench.io)
 [![Dataset](https://img.shields.io/badge/🤗_Dataset-Hugging_Face-yellow)](https://huggingface.co/datasets/MINT-SJTU/Evo-DexBench-dataset)
 [![Assets](https://img.shields.io/badge/🤗_Assets-Hugging_Face-yellow)](https://huggingface.co/datasets/MINT-SJTU/Evo-DexBench_Assets)
@@ -220,11 +220,30 @@ asset creators listed in [third-party notices](THIRD_PARTY_ASSETS.md).
 
 ## 📄 Citation
 
-<!-- Add the Evo-DexBench BibTeX citation when available. -->
+If you find Evo-DexBench useful in your research, please cite:
+
+```bibtex
+@misc{cheng2026evodexbenchbenchmarkinggeneralizationrelated,
+      title={Evo-DexBench: Benchmarking Generalization across Related Tasks for Dexterous Manipulation},
+      author={Bing Cheng and Yiran Mao and Zewei Ye and Yifan Jin and Xinyi Chen and Ruifeng Tu and Shuhuai Wang and Tao Lin and Zhimu Zhou and Yuxin Du and Fangwei Zhong and Junchi Yan and Bo Zhao},
+      year={2026},
+      eprint={2610.21180},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2610.21180},
+}
+```
 
 ## 📬 Contact
 
 If you have any questions or encounter any issues, please open an issue in this repository.
+
+You can also scan the QR codes below to contact Zewei Ye or join the WeChat discussion group:
+
+<p align="center">
+  <img src="contact/wechat_group.jpg" alt="Evo-DexBench WeChat discussion group" width="200">
+  <img src="contact/zeweiYe.jpg" alt="Zewei Ye on WeChat" width="200">
+</p>
 
 ## ⚖️ License
 
