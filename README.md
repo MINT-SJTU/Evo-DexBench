@@ -1,7 +1,7 @@
 # Evo-DexBench
 
 [![Paper](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/abs/2610.21180)
-[![Project Page](https://img.shields.io/badge/🌐_Project_Page-coming_soon-lightgrey)](https://mint-sjtu.github.io/Evo-DexBench.io)
+[![Project Page](https://img.shields.io/badge/🌐_Project_Page-Website-blue)](https://mint-sjtu.github.io/Evo-DexBench.io)
 [![Dataset](https://img.shields.io/badge/🤗_Dataset-Hugging_Face-yellow)](https://huggingface.co/datasets/MINT-SJTU/Evo-DexBench-dataset)
 [![Assets](https://img.shields.io/badge/🤗_Assets-Hugging_Face-yellow)](https://huggingface.co/datasets/MINT-SJTU/Evo-DexBench_Assets)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
@@ -238,7 +238,7 @@ If you find Evo-DexBench useful in your research, please cite:
 
 If you have any questions or encounter any issues, please open an issue in this repository.
 
-You can also scan the QR codes below to contact Zewei Ye or join the WeChat discussion group:
+You can also scan the QR codes below to join the WeChat discussion group (or contact Zewei Ye if the group QR code is expired):
 
 <p align="center">
   <img src="contact/wechat_group.jpg" alt="Evo-DexBench WeChat discussion group" width="200">
