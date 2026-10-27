@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 import hashlib
 import json
 import math
@@ -45,6 +47,29 @@ except Exception:  # pragma: no cover - depends on optional simulator stack.
     build_ground = None
     Articulation = None
     Pose = None
+
+
+# Some recorded teleoperation episodes were captured before settling started
+# zeroing residual velocities. Exact replay of those episodes must reproduce
+# that older settling; every other caller keeps the default behaviour.
+_SETTLE_RESETS_VELOCITY: bool = True
+
+
+@contextmanager
+def settle_velocity_reset(enabled: bool) -> Iterator[None]:
+    """Temporarily choose whether ``LayoutBuildResult.settle`` zeroes velocities.
+
+    Only intended for exact replay of recorded episodes. The previous value is
+    always restored, including when the body raises.
+    """
+
+    global _SETTLE_RESETS_VELOCITY
+    previous = _SETTLE_RESETS_VELOCITY
+    _SETTLE_RESETS_VELOCITY = bool(enabled)
+    try:
+        yield
+    finally:
+        _SETTLE_RESETS_VELOCITY = previous
 
 
 @dataclass
@@ -443,6 +468,9 @@ class LayoutBuildResult:
             scene.step()
         if self._env.gpu_sim_enabled:
             scene._gpu_fetch_all()
+
+        if not self.layout_spec.settle_resets_velocity or not _SETTLE_RESETS_VELOCITY:
+            return
 
         # Settling is an initialization operation. Do not leak residual rigid
         # body or articulation velocity into the first policy/replay step.

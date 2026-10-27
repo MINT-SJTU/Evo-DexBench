@@ -4,6 +4,7 @@ max_steps: 3000
 instruction: Open the sliding cabinet door, move the tennis ball from the first shelf to the second shelf and place it securely, then close the cabinet door.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: cabinet_accessible
       score: 0.20

@@ -4,6 +4,7 @@ max_steps: 2000
 instruction: Insert the sheet of paper between the stapler's upper and lower structures, press down to create a staple mark, and then move the stapler away.
 
 evaluation:
+  independent_stages: true
   stages:
     - {name: paper_grasped, score: 0.20}
     - {name: paper_under_stapler, score: 0.50}

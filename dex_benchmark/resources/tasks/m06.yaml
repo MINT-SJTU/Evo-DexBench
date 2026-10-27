@@ -4,6 +4,7 @@ instruction: Grasp the rotatable faucet handle and rotate it to the open positio
 max_steps: 2000
 
 evaluation:
+  independent_stages: true
   stages:
     - name: faucet_handle_contacted
       score: 0.30

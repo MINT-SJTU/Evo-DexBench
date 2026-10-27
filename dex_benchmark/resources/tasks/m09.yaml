@@ -4,6 +4,7 @@ instruction: Grasp the radial tab on top of the fixed kettle lid and rotate it u
 max_steps: 2500
 
 evaluation:
+  independent_stages: true
   stages:
     - name: cap_grasped
       score: 0.30

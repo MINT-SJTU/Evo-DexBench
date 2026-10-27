@@ -4,6 +4,7 @@ instruction: Open the microwave door, place the bowl inside the microwave, and t
 max_steps: 3500
 
 evaluation:
+  independent_stages: true
   stages:
     - name: open_microwave_door
       score: 0.25

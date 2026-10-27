@@ -4,6 +4,7 @@ instruction: Turn the knob on the fixed coffee machine to setting two.
 max_steps: 2500
 
 evaluation:
+  independent_stages: true
   stages:
     - name: coffee_knob_contacted
       score: 0.30

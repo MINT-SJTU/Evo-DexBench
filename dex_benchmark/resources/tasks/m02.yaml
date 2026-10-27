@@ -4,6 +4,7 @@ max_steps: 1000
 instruction: Flip the wall switch to the on position.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: reach_switch
       score: 0.30

@@ -21,11 +21,15 @@ dexbench = "dex_benchmark.cli:main"
 
 [project.optional-dependencies]
 maniskill = [
-    "mani_skill>=3.0.1,<3.1",
+    "mani_skill==3.0.1",
     # Gymnasium 1.4 adds a semaphore argument to AsyncVectorEnv workers.
     # CPUParallelEnv currently targets the compatible 1.2-1.3 worker contract.
     "gymnasium>=1.2,<1.4",
-    "sapien>=3.0",
+    "sapien==3.0.3",
+    # SAPIEN's PinocchioModel (CPU arm-controller IK) uses the pinocchio package
+    # when it is installed and a different built-in solver otherwise. Recorded
+    # datasets were collected with pinocchio 2.7.0.
+    "pin==2.7.0",
     "opencv-python==4.11.0.86",
     "transforms3d>=0.4",
     "trimesh>=4.0",
@@ -59,6 +63,7 @@ include = ["dex_benchmark*"]
 [tool.setuptools.package-data]
 "dex_benchmark.sim.robots.assets" = ["**/*"]
 "dex_benchmark.resources" = ["**/*.yaml", "**/*.json"]
+"dex_benchmark.sim.determinism" = ["*.c", "*.h", "tables/*.bin", "specs/*.json"]
 
 [tool.setuptools.exclude-package-data]
 "*" = ["**/__pycache__/*", "**/*.pyc"]

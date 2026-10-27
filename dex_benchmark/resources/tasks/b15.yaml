@@ -4,6 +4,7 @@ max_steps: 2500
 instruction: Fold one temple of the glasses fully into the storage position, and fold the other temple at least to the stable closed position.
 
 evaluation:
+  independent_stages: true
   stages:
     - {name: left_temple_folded, score: 0.40}
     - {name: right_temple_folded, score: 0.80}

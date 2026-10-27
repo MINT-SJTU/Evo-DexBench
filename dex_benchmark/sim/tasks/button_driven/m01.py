@@ -15,6 +15,8 @@ from dex_benchmark.sim.generalization import (
     TaskGeneralizationSpec,
 )
 from dex_benchmark.sim.scenes.layouts import ArticulationBuildValues, LayoutBuilder
+from dex_benchmark.sim.scenes.layouts.profiles import studio_button_press_layout
+from dex_benchmark.sim.scenes.layouts.spec import LayoutSpec
 from dex_benchmark.sim.robots.tactile import PairwiseContactQueryHandle
 from dex_benchmark.sim.tasks.attributes import LayoutId
 from dex_benchmark.sim.tasks.registry import TaskRegistry
@@ -135,6 +137,9 @@ class M01Env(DexVLABenchBaseEnv):
             kwargs.get("render_backend", "gpu") != "none"
         )
         super().__init__(*args, robot_uids=robot_uids, **kwargs)
+
+    def _configure_selected_layout(self, layout_spec: LayoutSpec) -> LayoutSpec:
+        return studio_button_press_layout(layout_spec)
 
     def _robot_base_pose(self, env_idx: Any | None = None) -> Any:
         del env_idx

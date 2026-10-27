@@ -4,6 +4,7 @@ max_steps: 2000
 instruction: Press and release the red Home button on the phone lying on the table, so that the screen is displayed.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: home_button_contacted
       score: 0.30

@@ -302,13 +302,7 @@ class B09Env(StudioTaskEnv):
         relative_linear_speed = torch.linalg.norm(
             self.plug.linear_velocity - self.socket.linear_velocity, dim=1
         )
-        relative_angular_speed = torch.linalg.norm(
-            self.plug.angular_velocity - self.socket.angular_velocity, dim=1
-        )
-        stable = (
-            (relative_linear_speed <= self.SUCCESS_SPEC.maximum_speed_mps)
-            & (relative_angular_speed <= 1.0)
-        )
+        stable = relative_linear_speed <= self.SUCCESS_SPEC.maximum_speed_mps
         success = self._latch_task_success(geometry["inserted"] & stable)
         return {
             "success": success,

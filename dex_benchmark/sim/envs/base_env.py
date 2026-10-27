@@ -1885,6 +1885,16 @@ class DexVLABenchBaseEnv(ManiSkillBaseEnv):
 
         return {
             "embodiment_id": self.embodiment_spec.embodiment_id,
+            "layout_physics_version": (
+                self.current_layout_spec.physics_version
+                if self.current_layout_spec is not None
+                else None
+            ),
+            "layout_settle_resets_velocity": (
+                self.current_layout_spec.settle_resets_velocity
+                if self.current_layout_spec is not None
+                else None
+            ),
             "generalization": {
                 "profile": (profile.value if axis is not None else None),
                 "axis": (axis.value if axis is not None else None),
@@ -2517,7 +2527,13 @@ class DexVLABenchBaseEnv(ManiSkillBaseEnv):
             layout_id = supported_layouts[0]
 
         self._selected_layout_id = layout_id
-        self._selected_layout_spec = LayoutRegistry.get(layout_id)
+        self._selected_layout_spec = self._configure_selected_layout(
+            LayoutRegistry.get(layout_id)
+        )
+
+    def _configure_selected_layout(self, layout_spec: LayoutSpec) -> LayoutSpec:
+        """Apply task-specific physics without modifying the shared registry."""
+        return layout_spec
 
     def _validate_reset_layout_request(self, options: dict[str, Any] | None) -> None:
         if not isinstance(options, dict) or "layout_id" not in options:

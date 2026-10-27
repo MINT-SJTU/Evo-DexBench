@@ -3,6 +3,7 @@ task_name: MouseWheel
 max_steps: 2000
 instruction: Hold the mouse and scroll the wheel downward.
 evaluation:
+  independent_stages: true
   stages:
     - {name: mouse_grasped, score: 0.25}
     - {name: wheel_contact, score: 0.50}

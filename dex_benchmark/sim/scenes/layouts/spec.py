@@ -650,6 +650,8 @@ class LayoutSpec:
     lighting: LayoutLightingSpec | None = None
     add_default_ground: bool = True
     settle_sim_steps: int = 0
+    settle_resets_velocity: bool = True
+    physics_version: str = "layout_v1"
 
     @property
     def static_boxes(self) -> list[StaticBoxSpec]:

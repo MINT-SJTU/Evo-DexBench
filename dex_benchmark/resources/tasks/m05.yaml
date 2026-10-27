@@ -3,6 +3,7 @@ task_name: DisplayPowerButton
 max_steps: 1500
 instruction: Press the power button to turn on the display.
 evaluation:
+  independent_stages: true
   stages:
     - {name: power_button_proximity, score: 0.30}
     - {name: power_button_contact, score: 0.60}

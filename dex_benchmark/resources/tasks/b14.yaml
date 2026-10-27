@@ -4,6 +4,7 @@ max_steps: 1500
 instruction: Use one hand to stabilize the box and the other hand to grasp the front edge or handle of the lid, then fully open the lid.
 
 evaluation:
+  independent_stages: true
   stages:
     - {name: box_stabilized, score: 0.30}
     - {name: lid_opening_started, score: 0.60}

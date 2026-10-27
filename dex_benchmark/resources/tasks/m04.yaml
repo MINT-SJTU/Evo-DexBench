@@ -4,6 +4,7 @@ max_steps: 1000
 instruction: Press down the toaster lever.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: reach_toaster
       score: 0.30

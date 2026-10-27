@@ -65,6 +65,10 @@ metadata prevents a strong reproducibility claim. Contact nondeterminism,
 changed assets/controllers, an incorrect simulation backend, or incomplete CPU
 copies before recording can all cause divergence.
 
+For strict verification with Intel/AMD CPU-numerics compatibility, use
+`--exact`; see the [exact replay guide](exact-replay.md) for requirements and
+supported replay directions.
+
 ## Export to LeRobot
 
 Create the converter environment once from the repository root:

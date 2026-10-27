@@ -184,6 +184,42 @@ def _replay_observation_vectors(
     return vectors
 
 
+def _run_exact(args: argparse.Namespace) -> None:
+    """Strict replay; the CPU numerics choice must precede any torch import."""
+
+    from dex_benchmark.data.canonical.exact_replay import (
+        ReplayRecipe,
+        file_sha256,
+        find_replay_recipe,
+        replay_episode_exactly,
+    )
+
+    episode = args.episode.expanduser().resolve()
+    recipe = find_replay_recipe(file_sha256(episode)) or ReplayRecipe()
+    numerics = recipe.cpu_numerics if args.cpu_numerics == "auto" else args.cpu_numerics
+    if numerics == "amd":
+        from dex_benchmark.sim.determinism import prepare_cpu_numerics
+
+        prepare_cpu_numerics("amd")
+    report = replay_episode_exactly(
+        episode,
+        recipe=recipe,
+        cpu_numerics=numerics,
+        render_backend=args.render_backend,
+        sim_freq=args.sim_freq,
+    )
+    report["status"] = (
+        "exact" if report["physics_exact"] and report["labels"]["match"]
+        else "physics_exact_labels_differ" if report["physics_exact"]
+        else "diverged"
+    )
+    text = json.dumps(report, ensure_ascii=True, indent=2)
+    if args.report is not None:
+        args.report.expanduser().parent.mkdir(parents=True, exist_ok=True)
+        args.report.expanduser().write_text(text + "\n", encoding="utf-8")
+    print(text)
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("episode", type=Path, help="Canonical episode HDF5 file.")
@@ -200,7 +236,26 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--video", type=Path, default=None, help="Optional replay MP4 output.")
     parser.add_argument("--video-fps", type=int, default=None, help="Defaults to control_hz.")
     parser.add_argument("--atol", type=float, default=1e-4)
+    parser.add_argument(
+        "--exact",
+        action="store_true",
+        help=(
+            "Strict replay: re-apply recorded arm re-anchors, use the episode's replay recipe, "
+            "and require bit-identical robot joint positions at every step. Recorded "
+            "success/stage labels are reported separately."
+        ),
+    )
+    parser.add_argument(
+        "--cpu-numerics",
+        choices=("auto", "native", "amd"),
+        default="auto",
+        help="With --exact: 'amd' emulates AMD RCPPS/RSQRTPS numerics on Intel CPUs; 'auto' follows the recipe.",
+    )
+    parser.add_argument("--report", type=Path, default=None, help="With --exact: also write the JSON report here.")
     args = parser.parse_args(argv)
+    if args.exact:
+        _run_exact(args)
+        return
     from dex_benchmark.sim.tasks import make_task_env
 
     episode = args.episode.expanduser().resolve()

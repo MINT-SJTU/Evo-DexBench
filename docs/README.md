@@ -10,6 +10,7 @@ documentation.
 - [Quest 3 teleoperation](guides/quest3-teleoperation.md)
 - [Data collection](guides/data-collection.md)
 - [Dataset tools and LeRobot export](guides/dataset-tools.md)
+- [Exact episode replay](guides/exact-replay.md)
 - [Evaluation](guides/evaluation.md)
 
 ## Interfaces and tasks

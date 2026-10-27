@@ -4,6 +4,7 @@ max_steps: 1500
 instruction: Press the lamp button to keep the lamp illuminated.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: button_contacted
       score: 0.30

@@ -4,6 +4,7 @@ max_steps: 1500
 instruction: Use one hand to stabilize the laptop base and the other hand to touch the screen, then close the screen to approximately 25 degrees.
 
 evaluation:
+  independent_stages: true
   stages:
     - {name: lid_edge_contacted, score: 0.30}
     - {name: lid_mid_angle_reached, score: 0.60}

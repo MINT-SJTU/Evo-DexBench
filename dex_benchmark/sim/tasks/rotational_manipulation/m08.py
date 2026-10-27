@@ -1055,6 +1055,6 @@ class M08Env(DexVLABenchBaseEnv):
             "coffee_knob_contacted": knob_contacted,
             "coffee_knob_rotated_correctly": self._knob_rotation_started,
             "coffee_knob_near_target": knob_near_target,
-            "coffee_knob_aligned": knob_aligned,
+            "coffee_knob_aligned": success,
             "coffee_target_detent_index": self._target_detent_indices,
         }

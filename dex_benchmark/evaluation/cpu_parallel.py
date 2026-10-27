@@ -145,12 +145,17 @@ class CPUSemanticActionEnv(gym.Wrapper):
         return dict(_wrapper_attr(self.env, "get_episode_metadata")())
 
     def episode_record(self) -> dict[str, Any]:
-        generalization = self.episode_metadata.get("generalization", {})
+        metadata = self.episode_metadata
+        generalization = metadata.get("generalization", {})
         return {
             "success": self._last_info.get("success", False),
             "episode_steps": self._steps,
             "stage_score": self._last_info.get("stage_score", 0.0),
             "layout_id": self._reset_info.get("layout_id", ""),
+            "layout_physics_version": metadata.get("layout_physics_version"),
+            "layout_settle_resets_velocity": metadata.get(
+                "layout_settle_resets_velocity"
+            ),
             "generalization_axis": self._reset_info.get(
                 "generalization_axis", generalization.get("axis")
             ),

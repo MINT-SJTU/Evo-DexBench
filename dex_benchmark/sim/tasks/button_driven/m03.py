@@ -17,6 +17,8 @@ from dex_benchmark.sim.generalization import (
     scaled_physical_material,
 )
 from dex_benchmark.sim.scenes.layouts import ArticulationBuildValues, LayoutBuilder
+from dex_benchmark.sim.scenes.layouts.profiles import studio_button_press_layout
+from dex_benchmark.sim.scenes.layouts.spec import LayoutSpec
 from dex_benchmark.sim.scenes.layouts.studio import (
     STUDIO_DESK_TOP_SURFACE_ID,
     STUDIO_PHYSICAL_MATERIAL,
@@ -155,6 +157,9 @@ class M03Env(DexVLABenchBaseEnv):
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, robot_uids=robot_uids, **kwargs)
+
+    def _configure_selected_layout(self, layout_spec: LayoutSpec) -> LayoutSpec:
+        return studio_button_press_layout(layout_spec)
 
     def _robot_base_pose(self) -> Any:
         return self.interaction_site_robot_base_sapien_pose()

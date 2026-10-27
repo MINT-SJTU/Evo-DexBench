@@ -4,6 +4,7 @@ max_steps: 4000
 instruction: Open any glass cabinet door above the dresser, place the candle upright from the lower shelf into the bottom level of the glass cabinet, release it.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: cabinet_door_opened
       score: 0.25

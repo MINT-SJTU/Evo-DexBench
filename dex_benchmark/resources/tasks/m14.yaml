@@ -4,6 +4,7 @@ max_steps: 4000
 instruction: Open the top drawer, take the banana out and place it securely on the desk, then close the drawer.
 
 evaluation:
+  independent_stages: true
   stages:
     - name: drawer_accessible
       score: 0.25

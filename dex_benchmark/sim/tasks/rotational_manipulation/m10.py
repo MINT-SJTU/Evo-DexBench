@@ -993,5 +993,5 @@ class M10Env(DexVLABenchBaseEnv):
             "success": success,
             "dishwasher_knob_contacted": knob_contacted,
             "dishwasher_knob_near_target": knob_near_target,
-            "dishwasher_knob_aligned": knob_aligned,
+            "dishwasher_knob_aligned": success,
         }

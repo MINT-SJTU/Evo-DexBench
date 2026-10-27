@@ -1560,8 +1560,8 @@ class M14Env(DexVLABenchBaseEnv):
         banana_on_desk = self._banana_on_desk_top()
         banana_static = self._banana_is_static()
         # Final task success is an outcome metric: it depends only on the
-        # banana's current placement, support, release, and stability. Ordered
-        # process credit remains the responsibility of compute_stage_score().
+        # banana's current placement, support, release, and stability. Partial
+        # process credit is scored independently by compute_stage_score().
         release_query_mask = (
             ~grasp_topology_satisfied
             & (

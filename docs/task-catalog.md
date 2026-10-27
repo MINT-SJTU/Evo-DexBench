@@ -2,7 +2,7 @@
 
 Evo-DexBench contains 30 tasks: 15 single-hand tasks (`m01_v1`–`m15_v1`) and 15 bimanual tasks (`b01_v1`–`b15_v1`). Task IDs are stable machine identifiers; task names and affordance families follow the paper taxonomy.
 
-StageScore is the highest configured score whose stage predicate has been reached during an episode. Tasks may use ordered or independent stage predicates as declared in their packaged YAML. Success is the final predicate and is reported as SR over the evaluation set.
+All tasks use independent stage scoring: a stage does not require earlier stages to have been credited. Partial-stage credit follows the persistence declared in the task YAML. The final stage is exactly the task success predicate and scores 1.0 whenever success is true, even if earlier stages were not recorded. SR is the success rate over the evaluation set.
 
 Use `dexbench tasks show TASK_ID` to inspect the task name, embodiment, scene, layouts, maximum episode steps, instruction, and stage definition.
 

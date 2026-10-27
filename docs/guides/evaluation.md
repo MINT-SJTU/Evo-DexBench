@@ -43,11 +43,14 @@ The installed policy plugin supplies the `--policy` name. Do not pass
 are diagnostic overrides. A formal log must contain `standard_protocol=true`.
 The protocol frequencies cannot be replaced through `--env-kwargs`.
 Environment overrides are diagnostic and record `standard_protocol=false`,
-including overrides that skip observation validation. The one audited exception
-is the equivalent state-only optimization
-`--obs-mode state_dict --env-kwargs '{"render_backend":"none"}'`, which avoids
-creating an unused renderer without changing the policy observation. The run
-header records all effective environment arguments with secrets redacted.
+including overrides that skip observation validation. For nominal state-only
+integration checks, `--obs-mode state_dict --env-kwargs '{"render_backend":"none"}'`
+avoids creating an unused renderer. A complete schedule containing camera
+generalization currently requires camera configuration: use a camera-enabled
+mode such as `--obs-mode rgb` with the default renderer, even for a policy that
+skips unused RGB frames. The renderless state-only path does not currently pass
+the camera-axis parameter-consumption check. The run header records all
+effective environment arguments with secrets redacted.
 
 Omitting `--log` creates a unique task/run JSONL file under `log/evaluations/`.
 An explicit `--log` must name a new file: existing logs are never overwritten.
@@ -75,8 +78,11 @@ The public evaluation reports only:
 
 - **SR** (`success_rate`): the fraction of episodes that satisfy the final task
   success predicate;
-- **StageScore**: the mean highest stage score reached under each task's
-  declared ordered or independent stage semantics.
+- **StageScore**: the mean episode stage score. All tasks score stages
+  independently, with partial credit following the task YAML persistence rules.
+  The final stage equals task success, so every successful episode scores 1.0
+  regardless of earlier-stage credit. Thus StageScore is at least SR when
+  computed from the same episode records on the same 0–1 scale.
 
 Before publishing a standard result, verify 100 complete episode records, 20
 records per condition, a 34/33/33 layout distribution in configured order,

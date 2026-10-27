@@ -4,6 +4,7 @@ instruction: Use the right hand to open the cabinet door, grasp the small cup by
 max_steps: 3000
 
 evaluation:
+  independent_stages: true
   stages:
     - name: open_cabinet_door
       score: 0.25

@@ -4,6 +4,7 @@ instruction: Turn the dishwasher knob to the target setting.
 max_steps: 2500
 
 evaluation:
+  independent_stages: true
   stages:
     - name: dishwasher_knob_contacted
       score: 0.30

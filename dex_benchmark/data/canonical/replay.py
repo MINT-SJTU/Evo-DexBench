@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Sequence
 from typing import Any, Mapping
 
 import numpy as np
@@ -91,6 +91,102 @@ def _native_actions(handle: Any) -> list[Any]:
     return actions
 
 
+def _read_recorded_infos(handle: Any) -> list[dict[str, Any]] | None:
+    """Return per-transition ``info`` dictionaries recorded during collection."""
+
+    if "transitions/info_json" not in handle:
+        return None
+    infos: list[dict[str, Any]] = []
+    for raw in handle["transitions/info_json"]:
+        text = raw.decode("utf-8") if isinstance(raw, bytes) else str(raw)
+        value = json.loads(text)
+        if not isinstance(value, dict):
+            raise ValueError("transitions/info_json must contain JSON objects.")
+        infos.append(value)
+    return infos
+
+
+def recorded_recovery_roles(info: Mapping[str, Any]) -> tuple[str, ...]:
+    """Roles whose arm target the teleoperation runner re-anchored after this step.
+
+    The Quest3 runner logs ``teleop_ik_recovery`` (stalled accumulated IK target)
+    and ``teleop_joint_limit_recovery`` (near-joint-limit target) after it has
+    reset the arm controller target to the current end-effector pose. Replaying
+    the recorded actions without repeating these resets changes the trajectory.
+    """
+
+    roles: set[str] = set()
+    ik_recovery = info.get("teleop_ik_recovery")
+    if isinstance(ik_recovery, Mapping):
+        roles.update(str(role) for role in ik_recovery.get("roles", ()))
+    for recovery in info.get("teleop_joint_limit_recovery", ()) or ():
+        if isinstance(recovery, Mapping) and "role" in recovery:
+            roles.add(str(recovery["role"]))
+    return tuple(sorted(roles))
+
+
+def resolve_env_callable(env: Any, name: str) -> Callable[..., Any] | None:
+    """Resolve a benchmark environment method through the Gym wrapper chain."""
+
+    current_env = env
+    while current_env is not None:
+        candidate = getattr(current_env, name, None)
+        if callable(candidate):
+            return candidate
+        current_env = getattr(current_env, "env", None)
+    wrapper_getter = getattr(env, "get_wrapper_attr", None)
+    if callable(wrapper_getter):
+        try:
+            candidate = wrapper_getter(name)
+        except AttributeError:
+            return None
+        if callable(candidate):
+            return candidate
+    return None
+
+
+def reset_arm_targets_to_current_pose(env: Any, roles: Iterable[str]) -> None:
+    """Re-anchor each role's accumulated end-effector target at its current pose.
+
+    Mirrors ``Quest3TeleopRunner._reset_ee_target_to_current_pose``.
+    """
+
+    from dex_benchmark.sim.tasks.runtime import ManipulatorRole
+
+    roles = tuple(roles)
+    if not roles:
+        return
+    agent_for_role = resolve_env_callable(env, "agent_for_role")
+    if not callable(agent_for_role):
+        raise RuntimeError("Replay needs env.agent_for_role() to re-apply recorded arm re-anchors.")
+    for role in roles:
+        arm_controller = agent_for_role(ManipulatorRole(role)).controller.controllers["arm"]
+        if not bool(getattr(getattr(arm_controller, "config", None), "use_target", False)):
+            continue
+        current_pose = getattr(arm_controller, "ee_pose_at_base", None)
+        if current_pose is None:
+            raise RuntimeError(f"Arm controller for role {role!r} does not expose ee_pose_at_base.")
+        arm_controller._target_pose = current_pose
+
+
+def bind_native_action(env: Any, action: Any) -> Any:
+    """Map a role-keyed native action ({"left": ..., "right": ...}) to env action keys.
+
+    Canonical HDF5 files store bimanual native actions per manipulator role, while
+    the ManiSkill environment expects its own per-agent keys.
+    """
+
+    if not isinstance(action, Mapping):
+        return action
+    get_spec = resolve_env_callable(env, "get_native_action_spec")
+    if not callable(get_spec):
+        return action
+    manipulators = get_spec().get("manipulators", {})
+    if not manipulators or not set(action).issubset(manipulators):
+        return action
+    return {manipulators[role]["agent_action_key"]: value for role, value in action.items()}
+
+
 def _reset_environment(
     env: Any,
     *,
@@ -135,11 +231,27 @@ def replay_canonical_episode(
     layout_id: str | None = None,
     options: Mapping[str, Any] | None = None,
     on_frame: Callable[[Any, int], None] | None = None,
+    apply_recorded_recovery: bool = True,
+    counterfactual_resets: Mapping[int, Sequence[str]] | None = None,
+    stop_on_done: bool = True,
+    pass_layout_to_reset: bool = True,
+    keep_outputs: bool = True,
+    on_step: Callable[[Any, int, Mapping[str, Any] | None, Mapping[str, Any]], None] | None = None,
 ) -> ReplayResult:
     """Replay native actions in ``env`` and return all outputs in memory.
 
     The HDF5 file is opened read-only and is never used as a replay output.
     ``seed``, ``layout_id`` and ``options`` override values stored in metadata.
+
+    ``apply_recorded_recovery`` repeats the arm re-anchors the teleoperation
+    runner logged after each step (see ``recorded_recovery_roles``).
+    ``counterfactual_resets`` maps a 1-based step to roles re-anchored *before*
+    that step; such resets are not recorded events and must be reported as
+    inferred by callers. ``stop_on_done=False`` replays every recorded action
+    even after the environment reports termination (recordings may continue).
+    ``pass_layout_to_reset=False`` resets with the seed only, for environments
+    already created with the episode layout. ``on_step(env, step, recorded_info,
+    info)`` runs after each step and its recorded re-anchors.
     """
 
     h5py = _require_h5py()
@@ -157,6 +269,9 @@ def replay_canonical_episode(
         stored_layout_id = None if stored_layout in (None, "") else str(stored_layout)
         replay_layout_id = layout_id if layout_id is not None else stored_layout_id
         actions = _native_actions(handle)
+        recorded_infos = _read_recorded_infos(handle) if (apply_recorded_recovery or on_step is not None) else None
+        if recorded_infos is not None and len(recorded_infos) != len(actions):
+            raise ValueError("transitions/info_json count does not match the native actions.")
         if (
             "actions/action_id" in handle
             and len(handle["actions/action_id"]) != len(actions)
@@ -166,7 +281,7 @@ def replay_canonical_episode(
     initial_observation, reset_info = _reset_environment(
         env,
         seed=replay_seed,
-        layout_id=replay_layout_id,
+        layout_id=replay_layout_id if pass_layout_to_reset else None,
         options=options,
     )
     if on_frame is not None:
@@ -177,17 +292,26 @@ def replay_canonical_episode(
     terminated: list[bool] = []
     truncated: list[bool] = []
     infos: list[Any] = []
+    resets_before_step = {int(step): tuple(roles) for step, roles in (counterfactual_resets or {}).items()}
     for step_index, action in enumerate(actions, start=1):
-        observation, reward, done, was_truncated, info = _step_result(env.step(action))
+        if step_index in resets_before_step:
+            reset_arm_targets_to_current_pose(env, resets_before_step[step_index])
+        observation, reward, done, was_truncated, info = _step_result(env.step(bind_native_action(env, action)))
+        recorded_info = None if recorded_infos is None else recorded_infos[step_index - 1]
+        if apply_recorded_recovery and recorded_info is not None:
+            reset_arm_targets_to_current_pose(env, recorded_recovery_roles(recorded_info))
+        if on_step is not None:
+            on_step(env, step_index, recorded_info, info)
         if on_frame is not None:
             on_frame(env, step_index)
-        replay_actions.append(to_cpu_copy(action))
-        observations.append(to_cpu_copy(observation))
-        rewards.append(to_cpu_copy(reward))
         terminated.append(done)
         truncated.append(was_truncated)
-        infos.append(to_cpu_copy(info))
-        if done or was_truncated:
+        if keep_outputs:
+            replay_actions.append(to_cpu_copy(action))
+            observations.append(to_cpu_copy(observation))
+            rewards.append(to_cpu_copy(reward))
+            infos.append(to_cpu_copy(info))
+        if stop_on_done and (done or was_truncated):
             break
     return ReplayResult(
         seed=replay_seed,
