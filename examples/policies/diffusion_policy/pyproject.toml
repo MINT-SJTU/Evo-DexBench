@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evodex-diffusion-policy-example"
+version = "0.1.0"
+description = "DP-C and DP-T policy plugins for Evo-DexBench"
+requires-python = ">=3.10"
+authors = [{ name = "MINT-SJTU" }]
+license = { text = "Apache-2.0" }
+dependencies = [
+    "dex-benchmark>=0.1.0",
+    "msgpack>=1.0",
+    "msgpack-numpy>=0.4.8",
+    "numpy>=1.26,<2",
+    "websockets>=11",
+]
+
+[project.entry-points."dex_benchmark.policies"]
+dp_c = "dp_policy:create_dp_c_policy"
+dp_t = "dp_policy:create_dp_t_policy"
+
+[tool.setuptools.packages.find]
+include = ["dp_policy*"]
+
+[tool.setuptools.package-data]
+dp_policy = ["UPSTREAM_COMMIT"]

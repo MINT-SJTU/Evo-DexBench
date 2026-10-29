@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+export LD_LIBRARY_PATH="${EVODEX_DP_OLD_LD_LIBRARY_PATH-}"
+unset EVODEX_DP_OLD_LD_LIBRARY_PATH

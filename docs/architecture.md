@@ -11,8 +11,8 @@ dex_benchmark/
   data/                    canonical dataset schema and conversion
   commands/               installed `dexbench` command implementations
   resources/              packaged task and protocol YAML
-examples/policies/        external policy plugins (minimal, KineDex)
-tools/                    environment, Vulkan, KineDex and Quest TLS setup
+examples/policies/        external policy plugins (minimal, KineDex, DP-C/DP-T)
+tools/                    environment, Vulkan, model and Quest TLS setup
 ```
 
 ## Dependency direction
@@ -58,7 +58,9 @@ The fixed evaluation schedule and SR/StageScore semantics remain in
 Run setup scripts from the repository root. The `sim` profile supports
 simulation, evaluation, and canonical dataset tools. The `vr` profile includes
 all of these plus Quest 3 dependencies; use one environment, not both.
-KineDex training/inference and LeRobot export use separate environments.
+KineDex training/inference, DP training/inference and LeRobot export use
+separate environments. The DP model profile is `policy-dp`; append
+`--with-dp-client` to a `sim` or `vr` setup to install its lightweight client.
 
 The setup helpers isolate user-site packages and install PyTorch 2.5.1 with
 CUDA 12.4. For a trusted package mirror, append

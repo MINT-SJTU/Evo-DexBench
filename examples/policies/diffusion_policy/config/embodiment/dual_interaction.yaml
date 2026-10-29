@@ -1,0 +1,13 @@
+name: dual
+state_dim: 62
+action_dim: 60
+camera_roles: [interaction, wrist_left, wrist_right]
+observation_keys: [interaction_rgb, wrist_left_rgb, wrist_right_rgb, state]
+shape_meta:
+  action:
+    shape: [60]
+  obs:
+    interaction_rgb: {shape: [3, 224, 224], type: rgb}
+    wrist_left_rgb: {shape: [3, 224, 224], type: rgb}
+    wrist_right_rgb: {shape: [3, 224, 224], type: rgb}
+    state: {shape: [62], type: low_dim}

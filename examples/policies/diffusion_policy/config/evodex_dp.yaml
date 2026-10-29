@@ -1,0 +1,136 @@
+defaults:
+  - variant: dp_c
+  - embodiment: single
+  - _self_
+
+name: evodex_${variant.name}_${embodiment.name}
+_target_: ${variant.workspace_target}
+task_name: evodex_${embodiment.name}
+shape_meta: ${embodiment.shape_meta}
+exp_name: default
+
+prediction_horizon: 30
+horizon: ${variant.model_horizon}
+n_obs_steps: 2
+n_action_steps: 29
+n_latency_steps: 0
+dataset_obs_steps: ${n_obs_steps}
+past_action_visible: false
+keypoint_visible_rate: 1.0
+obs_as_global_cond: true
+obs_as_cond: true
+
+policy: ${variant.policy}
+
+ema:
+  _target_: diffusion_policy.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+
+task:
+  dataset:
+    _target_: dp_policy.dataset.make_lerobot_v3_dp_dataset
+    dataset_path: null
+    repo_id: null
+    dataset_paths: null
+    repo_ids: null
+    replay_dataset_paths: null
+    replay_repo_ids: null
+    replay_ratio: 0.0
+    embodiment: ${embodiment.name}
+    camera_roles: ${embodiment.camera_roles}
+    horizon: ${horizon}
+    n_obs_steps: ${n_obs_steps}
+    val_ratio: 0.1
+    seed: ${training.seed}
+    split: train
+    video_backend: pyav
+    video_reader_cache_size: ${cpu_data_pipeline.video_reader_cache_size}
+    decode_max_gap_frames: ${cpu_data_pipeline.decode_max_gap_frames}
+    decode_max_span_frames: ${cpu_data_pipeline.decode_max_span_frames}
+  env_runner:
+    _target_: dp_policy.offline_runner.OfflineImageRunner
+
+dataloader:
+  batch_size: 32
+  num_workers: 8
+  shuffle: true
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: ${cpu_data_pipeline.prefetch_factor}
+val_dataloader:
+  batch_size: 32
+  num_workers: 4
+  shuffle: false
+  pin_memory: true
+  persistent_workers: false
+  prefetch_factor: ${cpu_data_pipeline.prefetch_factor}
+
+cpu_data_pipeline:
+  sampling_mode: locality
+  temporal_block_size: 128
+  prefetch_factor: 2
+  video_reader_cache_size: 8
+  decode_max_gap_frames: 30
+  decode_max_span_frames: 128
+
+optimizer: ${variant.optimizer}
+training:
+  device: cuda:0
+  seed: 42
+  debug: false
+  resume: true
+  resume_checkpoint: null
+  init_checkpoint: null
+  lr_scheduler: cosine
+  min_lr: null
+  lr_warmup_steps: ${variant.warmup_steps}
+  num_epochs: 100
+  gradient_accumulate_every: 1
+  use_ema: true
+  rollout_every: 1000000
+  checkpoint_every: 10
+  checkpoint_epochs: null
+  val_every: 1
+  sample_every: 5
+  max_train_steps: null
+  max_val_steps: null
+  tqdm_interval_sec: 1.0
+
+logging:
+  project: Evo-DexBench
+  resume: true
+  mode: online
+  name: ${now:%Y.%m.%d-%H.%M.%S}_${name}
+  tags: null
+  id: null
+  group: null
+
+checkpoint:
+  topk:
+    monitor_key: val_loss
+    mode: min
+    k: 3
+    format_str: epoch={epoch:04d}-val_loss={val_loss:.4f}.ckpt
+  save_last_ckpt: true
+  save_last_snapshot: false
+
+evodex:
+  variant: ${variant.name}
+  embodiment: ${embodiment.name}
+  prediction_horizon: ${prediction_horizon}
+  observation_horizon: ${n_obs_steps}
+  available_action_steps: ${n_action_steps}
+  state_dim: ${embodiment.state_dim}
+  action_dim: ${embodiment.action_dim}
+  observation_keys: ${embodiment.observation_keys}
+
+hydra:
+  run:
+    dir: outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}
+  sweep:
+    dir: outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}
+    subdir: ${hydra.job.num}

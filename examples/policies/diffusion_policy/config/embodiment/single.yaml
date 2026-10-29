@@ -1,0 +1,13 @@
+name: single
+state_dim: 31
+action_dim: 30
+camera_roles: [context, interaction, wrist_right]
+observation_keys: [context_rgb, interaction_rgb, wrist_right_rgb, state]
+shape_meta:
+  action:
+    shape: [30]
+  obs:
+    context_rgb: {shape: [3, 224, 224], type: rgb}
+    interaction_rgb: {shape: [3, 224, 224], type: rgb}
+    wrist_right_rgb: {shape: [3, 224, 224], type: rgb}
+    state: {shape: [31], type: low_dim}

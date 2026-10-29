@@ -7,6 +7,7 @@ export PYTHONNOUSERSITE=1
 profile="sim"
 name="evodexbench"
 with_kinedex_client="false"
+with_dp_client="false"
 torch_index_url="https://download.pytorch.org/whl/cu124"
 pip_index_url=""
 upstream_url=""
@@ -15,11 +16,12 @@ while [[ $# -gt 0 ]]; do
     --profile) profile="$2"; shift 2 ;;
     --name) name="$2"; shift 2 ;;
     --with-kinedex-client) with_kinedex_client="true"; shift ;;
+    --with-dp-client) with_dp_client="true"; shift ;;
     --torch-index-url) torch_index_url="$2"; shift 2 ;;
     --pip-index-url) pip_index_url="$2"; shift 2 ;;
     --upstream-url) upstream_url="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: tools/setup_environment.sh [--profile sim|vr|policy-kinedex] [--name ENV] [--with-kinedex-client] [--torch-index-url URL] [--pip-index-url URL] [--upstream-url URL]"
+      echo "Usage: tools/setup_environment.sh [--profile sim|vr|policy-kinedex|policy-dp] [--name ENV] [--with-kinedex-client] [--with-dp-client] [--torch-index-url URL] [--pip-index-url URL] [--upstream-url URL]"
       exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
@@ -28,23 +30,26 @@ done
 case "$profile" in
   sim) extras="maniskill,data,assets" ;;
   vr) extras="maniskill,data,assets,vr" ;;
-  policy-kinedex)
-    if [[ "$with_kinedex_client" == "true" ]]; then
-      echo "--with-kinedex-client belongs to the sim or vr profile." >&2
+  policy-kinedex|policy-dp)
+    if [[ "$with_kinedex_client" == "true" || "$with_dp_client" == "true" ]]; then
+      echo "Client flags belong to the sim or vr profile." >&2
       exit 2
     fi
     repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-    kinedex_args=(
+    model_args=(
       --name "$name"
       --torch-index-url "$torch_index_url"
     )
     if [[ -n "$pip_index_url" ]]; then
-      kinedex_args+=(--pip-index-url "$pip_index_url")
+      model_args+=(--pip-index-url "$pip_index_url")
     fi
     if [[ -n "$upstream_url" ]]; then
-      kinedex_args+=(--upstream-url "$upstream_url")
+      model_args+=(--upstream-url "$upstream_url")
     fi
-    exec "$repo_root/tools/setup_kinedex.sh" "${kinedex_args[@]}" ;;
+    if [[ "$profile" == "policy-dp" ]]; then
+      exec "$repo_root/tools/setup_diffusion_policy.sh" "${model_args[@]}"
+    fi
+    exec "$repo_root/tools/setup_kinedex.sh" "${model_args[@]}" ;;
   *) echo "Unknown profile: $profile" >&2; exit 2 ;;
 esac
 
@@ -66,6 +71,10 @@ conda run --no-capture-output --name "$name" python -m pip install \
 if [[ "$with_kinedex_client" == "true" ]]; then
   conda run --no-capture-output --name "$name" python -m pip install \
     -e "$repo_root/examples/policies/kinedex" "${pip_index_args[@]}"
+fi
+if [[ "$with_dp_client" == "true" ]]; then
+  conda run --no-capture-output --name "$name" python -m pip install \
+    -e "$repo_root/examples/policies/diffusion_policy" "${pip_index_args[@]}"
 fi
 
 conda run --no-capture-output --name "$name" python -m pip check

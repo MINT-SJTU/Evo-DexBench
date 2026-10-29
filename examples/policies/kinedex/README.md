@@ -212,6 +212,65 @@ W&B-compatible tracking services should be connected by an external launcher
 or environment configuration. The benchmark training package does not import
 or depend on a specific tracking backend.
 
+## Pretrained checkpoints
+
+Use the [released examples](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_access_example)
+without training. Complete the model setup above and create the simulator with
+`--with-kinedex-client` as described in the
+[repository README](../../../README.md#install). Prepare its assets before
+evaluation. Run commands from the benchmark repository root; authenticate with
+`hf auth login` if needed.
+
+Download the Single2 checkpoint in the simulator environment:
+
+```bash
+conda activate evodex-sim
+hf download MINT-SJTU/Evo-DexBench_model_access_example \
+  KineDex/single2-core.ckpt manifest.json \
+  --repo-type model --local-dir checkpoints/model-access-example
+```
+
+Terminal 1 — model environment:
+
+```bash
+conda activate evodex-kinedex
+python -m kinedex_policy.server \
+  --checkpoint checkpoints/model-access-example/KineDex/single2-core.ckpt \
+  --upstream-root "$PWD/.third_party/KineDex-official" \
+  --host 127.0.0.1 --port 8400 --device cuda:0
+```
+
+Terminal 2 — simulator environment, ten diagnostic episodes:
+
+```bash
+conda activate evodex-sim
+source assets/activate_evodex_assets.sh
+dexbench evaluate --policy kinedex --task-id m07_v1 \
+  --episodes 10 --num-envs 1 \
+  --control-mode arm_pd_ee_delta_pose_hand_pd_joint_pos --obs-mode rgb \
+  --policy-kwargs '{"host":"127.0.0.1","port":8400,"embodiment":"single","execute_steps":8,"tactile_mode":"full"}' \
+  --log results/kinedex_example_m07.jsonl
+```
+
+`single2-core.ckpt` supports `m06_v1`–`m09_v1`. For **Double3**, download and serve
+`KineDex/double3-core.ckpt`, choose `b11_v1`–`b14_v1`, and replace the client
+kwargs with:
+
+```json
+{"host":"127.0.0.1","port":8400,"embodiment":"dual","execute_steps":8,"tactile_mode":"full","camera_profile":"interaction"}
+```
+
+Both examples use **full tactile inputs**. Double3 requires the interaction
+camera profile, not the default dual-arm context view. Keep 30 Hz control and
+120 Hz simulation. For standard evaluation, omit `--episodes` and `--num-envs`
+to run 100 episodes with four workers; the ten-episode command is only an
+integration check. Choose a new log filename for every run.
+
+The released files retain inference weights, normalizers and policy metadata,
+but not optimizer or training-progress state; they are not full training-resume
+checkpoints. Load only trusted `.ckpt` files with the supplied server, not a
+generic `from_pretrained` loader.
+
 ## Deployment
 
 Start the policy server from the repository root in the model environment:

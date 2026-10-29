@@ -4,6 +4,7 @@
 [![Project Page](https://img.shields.io/badge/🌐_Project_Page-Website-blue)](https://mint-sjtu.github.io/Evo-DexBench.io)
 [![Dataset](https://img.shields.io/badge/🤗_Dataset-Hugging_Face-yellow)](https://huggingface.co/datasets/MINT-SJTU/Evo-DexBench-dataset)
 [![Assets](https://img.shields.io/badge/🤗_Assets-Hugging_Face-yellow)](https://huggingface.co/datasets/MINT-SJTU/Evo-DexBench_Assets)
+[![Model Integration Examples](https://img.shields.io/badge/🤗_Model_Integration_Examples-Hugging_Face-yellow)](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_access_example)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
 
 **Evo-DexBench** is a dexterous manipulation benchmark built on ManiSkill 3,
@@ -17,8 +18,8 @@ bimanual manipulation.
   generalization, reporting Success Rate (SR) and StageScore.
 - **Keyboard and Quest 3 teleoperation**, canonical data collection, and
   LeRobot export.
-- **Model-independent interfaces**, with a tactile-capable KineDex training
-  and evaluation example. Model and simulator runtimes remain separate.
+- **Model-independent interfaces**, with KineDex, DP-C and DP-T training
+  and evaluation examples. Model and simulator runtimes remain separate.
 
 Explore the [task catalog](docs/task-catalog.md) and
 [documentation](docs/README.md).
@@ -152,6 +153,26 @@ Logging uses the standard W&B API. See the
 [KineDex guide](examples/policies/kinedex/README.md) for logging, resource
 settings, ablations, and checkpoint continuation.
 
+## 🧠 DP-C / DP-T Training
+
+Create the independent model environment:
+
+```bash
+tools/setup_environment.sh --profile policy-dp --name evodex-dp
+conda activate evodex-dp
+python examples/policies/diffusion_policy/train.py \
+  variant=dp_c embodiment=single \
+  task.dataset.dataset_path=/absolute/path/to/m02 \
+  task.dataset.repo_id=local/evodex-m02 \
+  training.num_epochs=100 variant.optimizer.lr=1e-4 logging.mode=disabled \
+  hydra.run.dir=/absolute/path/to/dp-output
+```
+
+For DP-T, select `variant=dp_t` and replace `variant.optimizer.lr` with
+`variant.optimizer.learning_rate`. See the [DP guide](examples/policies/diffusion_policy/README.md)
+for Core/Gen dataset sampling, dual-arm configurations, checkpoint continuation
+and two-command evaluation. The official model source is pinned and unmodified.
+
 ## 📊 Evaluation
 
 **Terminal 1 — model server:**
@@ -180,6 +201,46 @@ Standard evaluation runs 100 episodes at **30 Hz control / 120 Hz simulation**
 and reports **SR** and **StageScore**. See the
 [evaluation guide](docs/guides/evaluation.md) for the protocol and diagnostic
 overrides.
+
+For DP-C or DP-T, install the lightweight client in the simulator environment:
+
+```bash
+conda activate evodex-sim
+python -m pip install -e examples/policies/diffusion_policy
+```
+
+Then start the model server in `evodex-dp`:
+
+```bash
+conda activate evodex-dp
+python -m dp_policy.server \
+  --checkpoint /absolute/path/to/dp-output/checkpoints/latest.ckpt \
+  --device cuda:0 --host 127.0.0.1 --port 8100
+```
+
+In a second terminal, run the simulator client:
+
+```bash
+conda activate evodex-sim
+source assets/activate_evodex_assets.sh
+dexbench evaluate --policy dp_c --task-id m02_v1 --obs-mode rgb \
+  --policy-kwargs '{"host":"127.0.0.1","port":8100,"embodiment":"single","execute_steps":8}' \
+  --log results/dp_c_m02.jsonl
+```
+
+Use `--policy dp_t` with a DP-T checkpoint. For a new simulator environment,
+`tools/setup_environment.sh --profile sim --name evodex-sim --with-dp-client`
+includes client installation.
+
+## 🤗 Example Checkpoints
+
+[Download pretrained DP-T, DP-C and KineDex examples](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_access_example)
+to run evaluation without training first. Each policy provides `single2-core`
+(M06–M09) and `double3-core` (B11–B14) checkpoints.
+See the [DP quick start](examples/policies/diffusion_policy/README.md#pretrained-checkpoints)
+or [KineDex quick start](examples/policies/kinedex/README.md#pretrained-checkpoints)
+for download, server and simulator commands. These are inference-only exports,
+not full training-resume checkpoints.
 
 ## 🔌 Integrate Your Model
 
@@ -214,6 +275,7 @@ We thank the developers and contributors of
 [SAPIEN](https://github.com/haosulab/SAPIEN),
 [RoboCasa](https://github.com/robocasa/robocasa),
 [KineDex](https://github.com/DinoMini00/KineDex_code),
+[Diffusion Policy](https://github.com/real-stanford/diffusion_policy),
 [Vuer](https://github.com/vuer-ai/vuer), and
 [dex-retargeting](https://github.com/dexsuite/dex-retargeting), as well as the
 asset creators listed in [third-party notices](THIRD_PARTY_ASSETS.md).

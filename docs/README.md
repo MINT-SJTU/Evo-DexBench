@@ -12,6 +12,8 @@ documentation.
 - [Dataset tools and LeRobot export](guides/dataset-tools.md)
 - [Exact episode replay](guides/exact-replay.md)
 - [Evaluation](guides/evaluation.md)
+- [KineDex training and inference](../examples/policies/kinedex/README.md)
+- [DP-C / DP-T training and inference](../examples/policies/diffusion_policy/README.md)
 
 ## Interfaces and tasks
 
