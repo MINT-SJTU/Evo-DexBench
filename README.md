@@ -18,8 +18,9 @@ bimanual manipulation.
   generalization, reporting Success Rate (SR) and StageScore.
 - **Keyboard and Quest 3 teleoperation**, canonical data collection, and
   LeRobot export.
-- **Model-independent interfaces**, with KineDex, DP-C and DP-T training
-  and evaluation examples. Model and simulator runtimes remain separate.
+- **Model-independent interfaces**, with KineDex, DP-C, DP-T and π0.5
+  training and evaluation examples. Model and simulator runtimes remain
+  separate.
 
 Explore the [task catalog](docs/task-catalog.md) and
 [documentation](docs/README.md).
@@ -173,6 +174,26 @@ For DP-T, select `variant=dp_t` and replace `variant.optimizer.lr` with
 for Core/Gen dataset sampling, dual-arm configurations, checkpoint continuation
 and two-command evaluation. The official model source is pinned and unmodified.
 
+## 🧠 π0.5 Training
+
+Prepare the pinned official OpenPI checkout and its uv-managed environment
+([uv](https://docs.astral.sh/uv/getting-started/installation/) and Git are
+required), then train jointly on LeRobot v3 datasets:
+
+```bash
+tools/setup_environment.sh --profile policy-pi05
+export OPENPI_ROOT="$PWD/.third_party/openpi"
+"$OPENPI_ROOT/.venv/bin/python" examples/policies/pi05/train.py \
+  --openpi-root "$OPENPI_ROOT" --embodiment single \
+  --dataset /absolute/path/to/m06 --dataset /absolute/path/to/m07 \
+  --dataset-id m06-m07 --output-dir /absolute/path/to/pi05-output
+```
+
+Training uses OpenPI's JAX trainer for full-parameter fine-tuning of the
+released π0.5 base and needs 80 GB GPUs. See the
+[π0.5 guide](examples/policies/pi05/README.md) for the dual-arm base,
+task-balanced sampling, continuation and server/client evaluation.
+
 ## 📊 Evaluation
 
 **Terminal 1 — model server:**
@@ -232,13 +253,29 @@ Use `--policy dp_t` with a DP-T checkpoint. For a new simulator environment,
 `tools/setup_environment.sh --profile sim --name evodex-sim --with-dp-client`
 includes client installation.
 
+For π0.5, install the client with
+`python -m pip install -e examples/policies/pi05` (or `--with-pi05-client`),
+serve a checkpoint with the official OpenPI server, and evaluate:
+
+```bash
+"$OPENPI_ROOT/.venv/bin/python" examples/policies/pi05/serve.py \
+  --openpi-root "$OPENPI_ROOT" --embodiment single \
+  --checkpoint /absolute/path/to/checkpoint-step --port 8000
+
+dexbench evaluate --policy pi05 --task-id m06_v1 --obs-mode rgb \
+  --policy-kwargs '{"host":"127.0.0.1","port":8000,"embodiment":"single","execute_steps":10}' \
+  --log results/pi05_m06.jsonl
+```
+
 ## 🤗 Example Checkpoints
 
-[Download pretrained DP-T, DP-C and KineDex examples](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_access_example)
-to run evaluation without training first. Each policy provides `single2-core`
-(M06–M09) and `double3-core` (B11–B14) checkpoints.
-See the [DP quick start](examples/policies/diffusion_policy/README.md#pretrained-checkpoints)
-or [KineDex quick start](examples/policies/kinedex/README.md#pretrained-checkpoints)
+[Download pretrained DP-T, DP-C, KineDex and π0.5 examples](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_access_example)
+to run evaluation without training first. Each policy provides a `single2-core`
+(M06–M09) checkpoint; DP-T, DP-C and KineDex add `double3-core` (B11–B14),
+and π0.5 adds `double2-core` (B06–B09).
+See the [DP quick start](examples/policies/diffusion_policy/README.md#pretrained-checkpoints),
+[KineDex quick start](examples/policies/kinedex/README.md#pretrained-checkpoints)
+or [π0.5 quick start](examples/policies/pi05/README.md#pretrained-checkpoints)
 for download, server and simulator commands. These are inference-only exports,
 not full training-resume checkpoints.
 
@@ -276,6 +313,7 @@ We thank the developers and contributors of
 [RoboCasa](https://github.com/robocasa/robocasa),
 [KineDex](https://github.com/DinoMini00/KineDex_code),
 [Diffusion Policy](https://github.com/real-stanford/diffusion_policy),
+[OpenPI](https://github.com/Physical-Intelligence/openpi),
 [Vuer](https://github.com/vuer-ai/vuer), and
 [dex-retargeting](https://github.com/dexsuite/dex-retargeting), as well as the
 asset creators listed in [third-party notices](THIRD_PARTY_ASSETS.md).

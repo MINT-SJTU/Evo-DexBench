@@ -17,8 +17,9 @@ Two patterns are supported:
    environment and install only a small client adapter with the simulator. The
    adapter still implements `PolicySession`, but its inference method sends a
    request to the model process. The
-   [KineDex](../examples/policies/kinedex/README.md) and
-   [DP-C/DP-T](../examples/policies/diffusion_policy/README.md) examples demonstrate this
+   [KineDex](../examples/policies/kinedex/README.md),
+   [DP-C/DP-T](../examples/policies/diffusion_policy/README.md) and
+   [π0.5](../examples/policies/pi05/README.md) examples demonstrate this
    pattern with WebSocket + MessagePack.
 
 WebSocket is not mandated by the benchmark. HTTP, gRPC, ZeroMQ, shared memory,

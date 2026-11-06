@@ -8,6 +8,7 @@ profile="sim"
 name="evodexbench"
 with_kinedex_client="false"
 with_dp_client="false"
+with_pi05_client="false"
 torch_index_url="https://download.pytorch.org/whl/cu124"
 pip_index_url=""
 upstream_url=""
@@ -17,11 +18,12 @@ while [[ $# -gt 0 ]]; do
     --name) name="$2"; shift 2 ;;
     --with-kinedex-client) with_kinedex_client="true"; shift ;;
     --with-dp-client) with_dp_client="true"; shift ;;
+    --with-pi05-client) with_pi05_client="true"; shift ;;
     --torch-index-url) torch_index_url="$2"; shift 2 ;;
     --pip-index-url) pip_index_url="$2"; shift 2 ;;
     --upstream-url) upstream_url="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: tools/setup_environment.sh [--profile sim|vr|policy-kinedex|policy-dp] [--name ENV] [--with-kinedex-client] [--with-dp-client] [--torch-index-url URL] [--pip-index-url URL] [--upstream-url URL]"
+      echo "Usage: tools/setup_environment.sh [--profile sim|vr|policy-kinedex|policy-dp|policy-pi05] [--name ENV] [--with-kinedex-client] [--with-dp-client] [--with-pi05-client] [--torch-index-url URL] [--pip-index-url URL] [--upstream-url URL]"
       exit 0 ;;
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
@@ -30,12 +32,24 @@ done
 case "$profile" in
   sim) extras="maniskill,data,assets" ;;
   vr) extras="maniskill,data,assets,vr" ;;
-  policy-kinedex|policy-dp)
-    if [[ "$with_kinedex_client" == "true" || "$with_dp_client" == "true" ]]; then
+  policy-kinedex|policy-dp|policy-pi05)
+    if [[ "$with_kinedex_client" == "true" || "$with_dp_client" == "true" || "$with_pi05_client" == "true" ]]; then
       echo "Client flags belong to the sim or vr profile." >&2
       exit 2
     fi
     repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    if [[ "$profile" == "policy-pi05" ]]; then
+      # OpenPI manages its own Python 3.11 environment with uv; --name and
+      # --torch-index-url do not apply.
+      pi05_args=()
+      if [[ -n "$pip_index_url" ]]; then
+        pi05_args+=(--pip-index-url "$pip_index_url")
+      fi
+      if [[ -n "$upstream_url" ]]; then
+        pi05_args+=(--upstream-url "$upstream_url")
+      fi
+      exec "$repo_root/tools/setup_pi05.sh" "${pi05_args[@]}"
+    fi
     model_args=(
       --name "$name"
       --torch-index-url "$torch_index_url"
@@ -75,6 +89,10 @@ fi
 if [[ "$with_dp_client" == "true" ]]; then
   conda run --no-capture-output --name "$name" python -m pip install \
     -e "$repo_root/examples/policies/diffusion_policy" "${pip_index_args[@]}"
+fi
+if [[ "$with_pi05_client" == "true" ]]; then
+  conda run --no-capture-output --name "$name" python -m pip install \
+    -e "$repo_root/examples/policies/pi05" "${pip_index_args[@]}"
 fi
 
 conda run --no-capture-output --name "$name" python -m pip check

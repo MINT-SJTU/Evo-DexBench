@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evodex-pi05-example"
+version = "0.1.0"
+description = "π0.5 (OpenPI) policy client for Evo-DexBench"
+requires-python = ">=3.10"
+authors = [{ name = "MINT-SJTU" }]
+license = { text = "Apache-2.0" }
+dependencies = [
+    "dex-benchmark>=0.1.0",
+    "numpy>=1.26,<2",
+    "websockets>=11",
+    # The lightweight official client from the pinned OpenPI commit; it does
+    # not install JAX, PyTorch or the OpenPI training stack.
+    "openpi-client @ git+https://github.com/Physical-Intelligence/openpi.git@15a9616a00943ada6c20a0f158e3adb39df2ccac#subdirectory=packages/openpi-client",
+]
+
+[project.entry-points."dex_benchmark.policies"]
+pi05 = "pi05_policy:create_pi05_policy"
+
+[tool.setuptools.packages.find]
+include = ["pi05_policy*"]
+
+[tool.setuptools.package-data]
+pi05_policy = ["UPSTREAM_COMMIT"]
