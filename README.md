@@ -7,11 +7,18 @@
 [![Model Integration Examples](https://img.shields.io/badge/🤗_Model_Integration_Examples-Hugging_Face-yellow)](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_access_example)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
 
+## 📢 Updates
+
+- **2026-11-08:** Added [π0.5 training and evaluation examples](examples/policies/pi05/README.md).
+- **2026-10-30:** Added [DP-C and DP-T training and evaluation examples](examples/policies/diffusion_policy/README.md).
+- **2026-10-27:** Added [exact replay across supported Intel and AMD CPU configurations](docs/guides/exact-replay.md).
+- **2026-10-12:** Released our dexterous manipulation benchmark project, including simulation tasks, teleoperation, data tools, and [evaluation](docs/guides/evaluation.md).
+
+## ✨ Overview
+
 **Evo-DexBench** is a dexterous manipulation benchmark built on ManiSkill 3,
 with visual, proprioceptive, and tactile observations for single-hand and
 bimanual manipulation.
-
-## ✨ Overview
 
 - **30 tasks** across six affordance families, with three layouts per task.
 - **Standard evaluation** with spatial, camera, lighting, and physical
