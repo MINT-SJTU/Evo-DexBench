@@ -186,12 +186,13 @@ The [released examples](https://huggingface.co/MINT-SJTU/Evo-DexBench_model_acce
 include π0.5 `single2-core` (M06–M09) and `double2-core` (B06–B09)
 checkpoints. Complete the model and client setup above and the
 [simulator asset setup](../../../README.md#download-assets), then download one
-checkpoint from the repository root:
+checkpoint with its license, notice, and manifest from the repository root:
 
 ```bash
 hf download MINT-SJTU/Evo-DexBench_model_access_example \
-  --include "pi05/single2-core/*" --include manifest.json \
-  --repo-type model --local-dir checkpoints/model-access-example
+  --repo-type model --local-dir checkpoints/model-access-example \
+  --include "pi05/single2-core/*" --include "pi05/LICENSE_GEMMA.txt" \
+  --include "pi05/NOTICE" --include "manifest.json"
 ```
 
 Terminal 1 — model environment:
@@ -215,8 +216,9 @@ dexbench evaluate --policy pi05 --task-id m09_v1 \
   --log results/pi05_example_m09.jsonl
 ```
 
-The Single2 checkpoint supports `m06_v1`–`m09_v1`. For **Double2**, download
-`pi05/double2-core/*`, serve it with `--embodiment dual`, choose
+The Single2 checkpoint supports `m06_v1`–`m09_v1`. For **Double2**, replace
+`pi05/single2-core/*` with `pi05/double2-core/*` in the download command and
+keep the other includes. Serve it with `--embodiment dual`, choose
 `b06_v1`–`b09_v1` and use
 `{"host":"127.0.0.1","port":8000,"embodiment":"dual","execute_steps":10}`
 as the client kwargs. Omit `--episodes` and `--num-envs` for the standard
