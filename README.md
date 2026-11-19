@@ -9,6 +9,7 @@
 
 ## 📢 Updates
 
+- **2026-11-19:** Evo-DexBench is now integrated into [StarVLA](https://github.com/starVLA/starVLA/tree/starVLA_dev/examples/simBenchmarks/EvoDexBench).
 - **2026-11-08:** Added [π0.5 training and evaluation examples](examples/policies/pi05/README.md).
 - **2026-10-30:** Added [DP-C and DP-T training and evaluation examples](examples/policies/diffusion_policy/README.md).
 - **2026-10-27:** Added [exact replay across supported Intel and AMD CPU configurations](docs/guides/exact-replay.md).
@@ -321,6 +322,7 @@ We thank the developers and contributors of
 [KineDex](https://github.com/DinoMini00/KineDex_code),
 [Diffusion Policy](https://github.com/real-stanford/diffusion_policy),
 [OpenPI](https://github.com/Physical-Intelligence/openpi),
+[StarVLA](https://github.com/starVLA/starVLA),
 [Vuer](https://github.com/vuer-ai/vuer), and
 [dex-retargeting](https://github.com/dexsuite/dex-retargeting), as well as the
 asset creators listed in [third-party notices](THIRD_PARTY_ASSETS.md).
