@@ -1,12 +1,20 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from contextlib import contextmanager
+import ctypes
 from dataclasses import dataclass
 import inspect
+import math
 import multiprocessing as mp
 import os
+from pathlib import Path
+import shutil
 import sys
+import tempfile
+import time
 import traceback
+import weakref
 from typing import TYPE_CHECKING, Any
 
 import gymnasium as gym
@@ -26,6 +34,57 @@ def _wrapper_attr(env: Any, name: str) -> Any:
     if callable(getter):
         return getter(name)
     return getattr(env, name)
+
+
+@contextmanager
+def _build_slot(slots: tuple[str, int] | None) -> Iterator[None]:
+    """Hold one of ``count`` scene-build slots shared through lock files.
+
+    Loading a scene briefly needs far more memory than the loaded scene keeps
+    (SAPIEN loads its meshes on thousands of short-lived threads). Workers that
+    build at the same time add these peaks up, so builds take turns.
+    """
+
+    if slots is None:
+        yield
+        return
+    import fcntl
+
+    directory, count = slots
+    handles = [open(Path(directory) / f"slot-{index}.lock", "a") for index in range(count)]
+    try:
+        while True:
+            for handle in handles:
+                try:
+                    fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    continue
+                try:
+                    yield
+                finally:
+                    fcntl.flock(handle, fcntl.LOCK_UN)
+                return
+            time.sleep(0.1)
+    finally:
+        for handle in handles:
+            handle.close()
+
+
+def _release_free_heap() -> None:
+    """Return freed heap memory to the OS after a scene build (glibc only).
+
+    The loader threads leave their freed memory in per-thread malloc arenas,
+    where glibc keeps it; without this a worker holds roughly its build peak
+    for its whole life.
+    """
+
+    if not sys.platform.startswith("linux"):
+        return
+    try:
+        trim = ctypes.CDLL(None).malloc_trim
+    except (AttributeError, OSError):
+        return
+    trim(0)
 
 
 def _semantic_action_space(metadata: Mapping[str, Any]) -> gym.spaces.Dict:
@@ -287,16 +346,20 @@ class ReconfigurableCPUSemanticEnv(gym.Env):
         env_kwargs: Mapping[str, Any],
         slot_index: int,
         action_bounds_policy: str,
+        build_slots: tuple[str, int] | None = None,
     ) -> None:
         self.task_id = task_id
         self.slot_index = slot_index
         self.action_bounds_policy = action_bounds_policy
+        self.build_slots = build_slots
         self._env_kwargs = dict(env_kwargs)
-        self._env = _build_cpu_semantic_env(
-            task_id,
-            self._env_kwargs,
-            action_bounds_policy=action_bounds_policy,
-        )
+        with _build_slot(build_slots):
+            self._env = _build_cpu_semantic_env(
+                task_id,
+                self._env_kwargs,
+                action_bounds_policy=action_bounds_policy,
+            )
+            _release_free_heap()
         self.observation_space = self._env.observation_space
         self.action_space = self._env.action_space
         self.metadata = dict(getattr(self._env, "metadata", {}))
@@ -370,21 +433,23 @@ class ReconfigurableCPUSemanticEnv(gym.Env):
             self._env_kwargs = requested
             return False
 
-        replacement = _build_cpu_semantic_env(
-            self.task_id,
-            requested,
-            action_bounds_policy=self.action_bounds_policy,
-        )
-        if replacement.observation_space != self.observation_space:
-            replacement.close()
-            raise ValueError("Reconfigured environment changed observation space.")
-        if replacement.action_space != self.action_space:
-            replacement.close()
-            raise ValueError("Reconfigured environment changed action space.")
-        previous = self._env
-        self._env = replacement
-        self._env_kwargs = requested
-        previous.close()
+        with _build_slot(self.build_slots):
+            replacement = _build_cpu_semantic_env(
+                self.task_id,
+                requested,
+                action_bounds_policy=self.action_bounds_policy,
+            )
+            if replacement.observation_space != self.observation_space:
+                replacement.close()
+                raise ValueError("Reconfigured environment changed observation space.")
+            if replacement.action_space != self.action_space:
+                replacement.close()
+                raise ValueError("Reconfigured environment changed action space.")
+            previous = self._env
+            self._env = replacement
+            self._env_kwargs = requested
+            previous.close()
+            _release_free_heap()
         return True
 
     def prepare(
@@ -446,6 +511,7 @@ class CPUEnvFactory:
     parent_metadata: Mapping[str, Any] | None = None
     parent_pid: int | None = None
     slot_index: int = 0
+    build_slots: tuple[str, int] | None = None
 
     def __call__(self) -> gym.Env:
         # AsyncVectorEnv constructs one dummy environment in the parent solely
@@ -480,6 +546,7 @@ class CPUEnvFactory:
             env_kwargs=self.env_kwargs,
             slot_index=self.slot_index,
             action_bounds_policy=self.action_bounds_policy,
+            build_slots=self.build_slots,
         )
 
 
@@ -566,6 +633,7 @@ def _factory_with_parent_spaces(
         parent_metadata=metadata,
         parent_pid=os.getpid(),
         slot_index=factory.slot_index,
+        build_slots=factory.build_slots,
     )
 
 
@@ -691,15 +759,44 @@ class CPUParallelEnv:
         context: str = "forkserver",
         startup_timeout: float = 600.0,
         worker_timeout: float | None = 300.0,
+        concurrent_builds: int | None = 1,
+        build_lock_dir: str | os.PathLike[str] | None = None,
     ) -> None:
+        """Start ``num_envs`` worker processes.
+
+        ``concurrent_builds`` limits how many workers build a scene at once
+        (``None`` lets all of them build together). ``build_lock_dir`` shares
+        that limit with other ``CPUParallelEnv`` instances using the same
+        directory, e.g. several evaluations on one host; by default each
+        instance uses a private directory.
+        """
+
         if num_envs <= 0:
             raise ValueError("num_envs must be positive.")
         if worker_timeout is not None and worker_timeout <= 0:
             raise ValueError("worker_timeout must be positive or None.")
+        if concurrent_builds is not None and concurrent_builds <= 0:
+            raise ValueError("concurrent_builds must be positive or None.")
+        build_slots: tuple[str, int] | None = None
+        self._remove_lock_dir: Callable[[], Any] | None = None
+        if concurrent_builds is not None:
+            if build_lock_dir is None:
+                build_lock_dir = tempfile.mkdtemp(prefix="evodex-env-build-")
+                self._remove_lock_dir = weakref.finalize(
+                    self, shutil.rmtree, build_lock_dir, ignore_errors=True
+                )
+            else:
+                Path(build_lock_dir).mkdir(parents=True, exist_ok=True)
+            build_slots = (os.fspath(build_lock_dir), concurrent_builds)
+        # A worker may wait for the others' builds before starting its own.
+        self._build_wait_factor = (
+            1 if concurrent_builds is None else math.ceil(num_envs / concurrent_builds)
+        )
         base_factory = CPUEnvFactory(
             task_id,
             dict(env_kwargs),
             action_bounds_policy,
+            build_slots=build_slots,
         )
         has_disabled_autoreset = (
             "autoreset_mode" in inspect.signature(AsyncVectorEnv).parameters
@@ -719,6 +816,7 @@ class CPUParallelEnv:
                 parent_metadata=base_factory.parent_metadata,
                 parent_pid=base_factory.parent_pid,
                 slot_index=slot_index,
+                build_slots=build_slots,
             )
             for slot_index in range(num_envs)
         )
@@ -767,7 +865,7 @@ class CPUParallelEnv:
             )
         self._env.call_async("reconfigure", rows)
         return tuple(
-            bool(value) for value in self._env.call_wait(timeout=self.worker_timeout)
+            bool(value) for value in self._env.call_wait(timeout=self._build_timeout())
         )
 
     def prepare(
@@ -783,8 +881,13 @@ class CPUParallelEnv:
             )
         self._env.call_async("prepare", rows, seed_rows)
         return tuple(
-            dict(value) for value in self._env.call_wait(timeout=self.worker_timeout)
+            dict(value) for value in self._env.call_wait(timeout=self._build_timeout())
         )
+
+    def _build_timeout(self) -> float | None:
+        if self.worker_timeout is None:
+            return None
+        return self.worker_timeout * self._build_wait_factor
 
     def mark_timeouts(self, timeouts: Sequence[bool]) -> None:
         rows = tuple(bool(value) for value in timeouts)
@@ -834,7 +937,11 @@ class CPUParallelEnv:
     def close(self) -> None:
         # Gymnasium escalates to process termination automatically if the
         # graceful close does not complete before the timeout.
-        self._env.close(timeout=10)
+        try:
+            self._env.close(timeout=10)
+        finally:
+            if self._remove_lock_dir is not None:
+                self._remove_lock_dir()
 
 
 @dataclass(frozen=True)
