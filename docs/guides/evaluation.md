@@ -22,6 +22,13 @@ contains:
 Each episode activates at most one generalization axis. Scheduling is
 deterministic and independent of worker completion order.
 
+CPU workers build their scenes one at a time and then return the memory freed
+by the scene loader to the system. Building a scene briefly needs much more
+memory than the built scene keeps: on one 128-core host a standard run of
+`m04_v1` peaked at 13 GiB and of `m01_v1` at 27 GiB, and both settled at about
+6 GiB. Plan host memory for that peak. Build order does not affect simulation
+results.
+
 Start the policy server in its own environment, then run the simulator client:
 
 Install the lightweight KineDex client in the simulation environment using
